@@ -2,112 +2,111 @@
 using DataAccess;
 using Microsoft.EntityFrameworkCore;
 
-namespace CinemaApplication.DataAccess.Repositories
+namespace CinemaApplication.DataAccess.Repositories;
+
+internal class MovieDataAccess : IMovieDataAccess
 {
-    internal class MovieDataAccess : IMovieDataAccess
+    private readonly AppDbContext _context;
+    private readonly IMovieProjectionDataAccess _movieProjectionDataAccess;
+    public MovieDataAccess(AppDbContext context, IMovieProjectionDataAccess movieProjectionDataAccess)
     {
-        private readonly AppDbContext _context;
-        private readonly IMovieProjectionDataAccess _movieProjectionDataAccess;
-        public MovieDataAccess(AppDbContext context, IMovieProjectionDataAccess movieProjectionDataAccess)
+        _context = context;
+        _movieProjectionDataAccess = movieProjectionDataAccess;
+    }
+
+    public async Task<IEnumerable<Movie>> GetMoviesAsync()
+    {
+        try
         {
-            _context = context;
-            _movieProjectionDataAccess = movieProjectionDataAccess;
+            return await _context.Movies
+                .Include(movie => movie.Projections)
+                .ThenInclude(projection => projection.CinemaRoom)
+                .Include(movie => movie.Projections)
+                .ThenInclude(projection => projection.Reservations)
+                .ToListAsync();
         }
-
-        public async Task<IEnumerable<Movie>> GetMoviesAsync()
+        catch (Exception ex)
         {
-            try
-            {
-                return await _context.Movies
-                    .Include(movie => movie.Projections)
-                    .ThenInclude(projection => projection.CinemaRoom)
-                    .Include(movie => movie.Projections)
-                    .ThenInclude(projection => projection.Reservations)
-                    .ToListAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
+            Console.WriteLine(ex.Message);
+            throw;
         }
+    }
 
-        public async Task<Movie> GetMovieAsync(int id)
+    public async Task<Movie> GetMovieAsync(int id)
+    {
+        try
         {
-            try
-            {
-                return await _context.Movies
-                   .Include(movie => movie.Projections)
-                   .ThenInclude(projection => projection.CinemaRoom)
-                   .Include(movie => movie.Projections)
-                   .ThenInclude(projection => projection.Reservations)
-                   .FirstOrDefaultAsync(movie => movie.Id == id);
+            return await _context.Movies
+               .Include(movie => movie.Projections)
+               .ThenInclude(projection => projection.CinemaRoom)
+               .Include(movie => movie.Projections)
+               .ThenInclude(projection => projection.Reservations)
+               .FirstOrDefaultAsync(movie => movie.Id == id);
 
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
         }
-
-        public async Task<int> CreateMovieAsync(Movie movie)
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await _context.Movies.AddAsync(movie);
-                await _context.SaveChangesAsync();
-
-                return result.Entity.Id;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
+            Console.WriteLine(ex.Message);
+            throw;
         }
+    }
 
-        public async Task UpdateMovieAsync(int id, Movie movie)
+    public async Task<int> CreateMovieAsync(Movie movie)
+    {
+        try
         {
-            try
-            {
-                Movie foundMovie = await GetMovieAsync(id);
-                if (foundMovie is null)
-                    return;
+            var result = await _context.Movies.AddAsync(movie);
+            await _context.SaveChangesAsync();
 
-                foundMovie.Name = movie.Name;
-                foundMovie.Length = movie.Length;
-                foundMovie.Director = movie.Director;
-                foundMovie.Summary = movie.Summary;
-                foundMovie.Type = movie.Type;
-
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                throw;
-            }
+            return result.Entity.Id;
         }
-
-        public async Task DeleteMovieAsync(int id)
+        catch (Exception ex)
         {
-            try
-            {
-                Movie foundMovie = await GetMovieAsync(id);
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
 
-                foreach (MovieProjection projection in foundMovie.Projections)
-                {
-                    await _movieProjectionDataAccess.DeleteMovieProjectionAsync(projection.Id);
-                }
-                _context.Movies.Remove(foundMovie);
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
+    public async Task UpdateMovieAsync(int id, Movie movie)
+    {
+        try
+        {
+            Movie foundMovie = await GetMovieAsync(id);
+            if (foundMovie is null)
+                return;
+
+            foundMovie.Name = movie.Name;
+            foundMovie.Length = movie.Length;
+            foundMovie.Director = movie.Director;
+            foundMovie.Summary = movie.Summary;
+            foundMovie.Type = movie.Type;
+
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
+    public async Task DeleteMovieAsync(int id)
+    {
+        try
+        {
+            Movie foundMovie = await GetMovieAsync(id);
+
+            foreach (MovieProjection projection in foundMovie.Projections)
             {
-                Console.WriteLine(ex.Message);
-                throw;
+                await _movieProjectionDataAccess.DeleteMovieProjectionAsync(projection.Id);
             }
+            _context.Movies.Remove(foundMovie);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
         }
     }
 }
