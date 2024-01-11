@@ -2,7 +2,204 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<style>
+    .background-image::after {
+        content: "";
+        background-image: url('/images/cinema-background-image.jpg');
+        opacity: 0.85;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: -1;
+    }
+</style>
+
+@* <% if(loggedIn != null){%>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+        </symbol>
+    </svg>
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert">
+                    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                    <div>You have successfully logged in!</div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+<%}%>*@
+<h2 class="text-center pb-4 pt-1">Home Page</h2>
+<section class="container pt-1">
+    <div class="row">
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="card mb-4 shadow ms-3 me-3">
+                <div class="card-header">
+                    <h4 class="text-center">Title One</h4>
+                </div>
+                <img class="card-img-top h-50" src="/images/noimage.jpg" />
+                <div class="card-body">
+                    <p class="card-text">
+                        Some quick example text to build on the card title
+                        and make up the bulk of the card's content.
+                    </p>
+                </div>
+                <div class="card-footer text-center pb-2 pt-2">
+                    <a href="#" class="btn btn-outline-dark">Check It Out</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="card mb-4 shadow ms-3 me-3">
+                <div class="card-header">
+                    <h4 class="text-center">Title Two</h4>
+                </div>
+                <img class="card-img-top h-50" src="/images/noimage.jpg" />
+                <div class="card-body">
+                    <p class="card-text">
+                        Some quick example text to build on the card title
+                        and make up the bulk of the card's content.
+                    </p>
+                </div>
+                <div class="card-footer text-center pb-2 pt-2">
+                    <a href="#" class="btn btn-outline-dark">Check It Out</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-md-4">
+            <div class="card mb-4 shadow ms-3 me-3">
+                <div class="card-header">
+                    <h4 class="text-center">Title Three</h4>
+                </div>
+                <img class="card-img-top h-50" src="/images/noimage.jpg" />
+                <div class="card-body">
+                    <p class="card-text">
+                        Some quick example text to build on the card title
+                        and make up the bulk of the card's content.
+                    </p>
+                </div>
+                <div class="card-footer text-center pb-2 pt-2">
+                    <a href="#" class="btn btn-outline-dark">Check It Out</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="text-hide mt-4 position-relative background-image"
+        style="min-height: 450px;">
+    <div class="container pt-3">
+        <div class="row pt-4">
+            <div class="col-md-8">
+                <h3 class="text-white text-center">Do Not Miss Out On The New Movies!</h3>
+                <div class="pt-3">
+                    <p class="text-white">Lorem ipsum dolor sit amet, consectetur adipiscing elit, 
+                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. 
+                        Ut enim ad minim veniam, 
+                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. 
+                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+                        Excepteur sint occaecat cupidatat non proident, 
+                        sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+
+                    <p class="text-white">
+                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                        Ut enim ad minim veniam,
+                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                        Excepteur sint occaecat cupidatat non proident,
+                        sunt in culpa qui officia deserunt mollit anim id est laborum.
+                    </p>
+                </div>
+                <div class="d-flex justify-content-center pt-2">
+                    <a href="#" class="btn btn-lg btn-dark py-2 me-3" style="width: 255px">
+                        Check Cinema Program</a>
+                    <a href="#" class="btn btn-lg btn-primary py-2 ms-3" style="width: 255px;">
+                        Get Movie Tickets</a>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <img class="img-fluid" src="Images/noimage.jpg" style="height: 100%;" />
+            </div>
+        </div>
+
+    </div>
+</section>
+<section class="my-5">
+    <div class="container">
+        <h2 class="text-center mb-4 pb-3">What People Say About Us</h2>
+        <div id="recommendationsCarousel" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div class="carousel-item active">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam tristique mauris eget justo aliquam faucibus. Curabitur in justo a ex iaculis tempor. Donec sed pulvinar lacus.</p>
+                                    <p class="text-end"><em>- John Doe</em></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <p class="card-text">Vestibulum at magna eu enim consectetur vulputate. Quisque ullamcorper lorem id tellus euismod lacinia. Sed malesuada finibus odio in feugiat.</p>
+                                    <p class="text-end"><em>- Jane Smith</em></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <p class="card-text">Suspendisse convallis nulla ac est fringilla, in ultricies nisl dapibus. Nullam aliquet eros et efficitur cursus. Fusce mattis tellus ac commodo tempus.</p>
+                                    <p class="text-end"><em>- Sarah Johnson</em></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-item">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <p class="card-text">Integer ullamcorper sapien vitae lectus feugiat aliquam. Duis tristique, sem at finibus volutpat, ligula eros molestie dui, nec condimentum velit mauris vel metus.</p>
+                                    <p class="text-end"><em>- Mark Wilson</em></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <p class="card-text">Fusce sollicitudin urna nec felis efficitur, ut euismod lorem pharetra. Sed at pulvinar lectus. Nam in lectus quis mi tempus fermentum.</p>
+                                    <p class="text-end"><em>- Emily Davis</em></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card shadow">
+                                <div class="card-body">
+                                    <p class="card-text">Vivamus cursus ultricies ligula, a venenatis odio aliquet eget. Praesent facilisis metus nulla, id aliquam felis consequat id.</p>
+                                    <p class="text-end"><em>- Michael Brown</em></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <a class="carousel-control-prev" data-bs-target="#recommendationsCarousel"
+                role="button" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Previous</span>
+            </a>
+            <button class="carousel-control-next" data-bs-target="#recommendationsCarousel"
+                role="button" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Next</span>
+            </button>
+        </div>
+    </div>
+</section>

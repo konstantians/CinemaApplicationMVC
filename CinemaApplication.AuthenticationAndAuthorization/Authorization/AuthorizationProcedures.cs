@@ -4,7 +4,7 @@ using CinemaApplication.SharedModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-public class AuthorizationProcedures
+public class AuthorizationProcedures : IAuthorizationProcedures
 {
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly UserManager<AppUser> _userManager;
@@ -36,6 +36,24 @@ public class AuthorizationProcedures
             if (foundRole is null)
             {
                 Console.WriteLine($"role with {roleId} was not found.");
+            }
+            return foundRole;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<IdentityRole> GetRoleByNameAsync(string roleName)
+    {
+        try
+        {
+            var foundRole = await _roleManager.FindByNameAsync(roleName);
+            if (foundRole is null)
+            {
+                Console.WriteLine($"role with {roleName} was not found.");
             }
             return foundRole;
         }
@@ -120,15 +138,16 @@ public class AuthorizationProcedures
         }
     }
 
-    public async Task AddRoleToUserAsync(string userId, string roleId)
+    public async Task<bool> AddRoleToUserAsync(string userId, string roleId)
     {
         try
         {
             (var wasFound, var foundUser, var foundRole) = (await DoesTheInformationExist(userId, roleId));
             if (!wasFound)
-                return;
+                return false;
 
-            await _userManager.AddToRoleAsync(foundUser, foundRole.Name);
+            var result = await _userManager.AddToRoleAsync(foundUser, foundRole.Name);
+            return result.Succeeded;
         }
         catch (Exception ex)
         {
@@ -173,5 +192,7 @@ public class AuthorizationProcedures
 
         return (true, foundUser, foundRole);
     }
+
+    
 }
 
