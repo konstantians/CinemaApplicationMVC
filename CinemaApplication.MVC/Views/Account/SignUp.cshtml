@@ -20,40 +20,36 @@
     </div>
 </div>
 <%}%> *@
-@* <div class="shadow p-3"> *@
+<div class="shadow offset-2 col-8 p-3" style="background-color:white;">
     <h2 class="text-center mb-4">User Register</h2>
     <form method="post">
         <div class="row">
-            <div class="offset-2 col-4 mb-4 mt-1">
-                <label class="form-label" asp-for="Username">Enter Username</label>
+            <div class="col-6 mb-4 mt-1">
+                <label class="form-label" asp-for="Username"><i class="fa-solid fa-user me-2"></i>Username</label>
                 <input class="form-control" asp-for="Username" type="text" placeholder="Enter username">
                 <span asp-validation-for="Username"></span>
             </div>
-            <div class="col-4 mb-4 mt-1">
-                <label class="form-label" asp-for="Email">Enter Email</label>
+            <div class="col-6 mb-4 mt-1">
+                <label class="form-label" asp-for="Email"><i class="fa-solid fa-envelope me-2"></i>Email</label>
                 <input class="form-control" asp-for="Email" type="email" placeholder="Enter email">
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
-        </div>
-        <div class="row">
-            <div class="offset-2 col-4 mb-4 mt-1">
-                <label class="form-label" asp-for="Password">Enter Password</label>
+            <div class="col-6 mb-4 mt-1">
+                <label class="form-label" asp-for="Password"><i class="fa-solid fa-lock me-2"></i>Password</label>
                 <input class="form-control" asp-for="Password" type="password" placeholder="Enter password">
                 <span asp-validation-for="Password" class="text-danger"></span>
             </div>
-            <div class="col-4 mb-4 mt-1">
-                <label class="form-label" asp-for="PhoneNumber">Enter Phone Number</label>
+            <div class="col-6 mb-4 mt-1">
+                <label class="form-label" asp-for="PhoneNumber"><i class="fa-solid fa-phone me-2"></i> Phone Number</label>
                 <input class="form-control" asp-for="PhoneNumber" type="tel" placeholder="Enter phone number">
                 <span asp-validation-for="PhoneNumber" class="text-danger"></span>
             </div>
-        </div>
-        <div class="row">
-            <div class="offset-2 col-4 mb-4 mt-1">
-                <label asp-for="RepeatPassword">Repeat Password</label>
+            <div class="col-6 mb-4 mt-1">
+                <label class="form-label" asp-for="RepeatPassword"><i class="fa-solid fa-lock me-2"></i>Repeat Password</label>
                 <input class="form-control" asp-for="RepeatPassword" type="password" placeholder="Repeat password">
                 <span asp-validation-for="RepeatPassword" class="text-danger"></span>
             </div>
-            <div class="col-4 mb-4 mt-1">
+            <div class="col-6 mb-4 mt-1">
                 <p>Choose Account Type</p>
                 <div class="form-check form-check-inline">
                     <input checked class="form-check-input" type="radio" id="userRadio" name="AccountType" value="User" asp-for="AccountType">
@@ -70,7 +66,13 @@
             </div>
         </div>
         <div class="d-flex justify-content-center mt-3">
-            <button type="submit" class="btn btn-primary" style="width: 20%;">Register Account</button>
+            <button type="submit" class="btn btn-primary" style="width: 25%;">Register Account</button>
         </div>
     </form>
-@* </div> *@
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

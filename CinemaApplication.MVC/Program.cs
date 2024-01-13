@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using DataAccess;
 using AuthenticationAndAuthorization.Authentication;
 using CinemaApplication.AuthenticationAndAuthorization;
+using CinemaApplication.EmailServiceLibrary;
 
 namespace CinemaApplication.MVC
 {
@@ -26,7 +27,8 @@ namespace CinemaApplication.MVC
             );
 
             builder.Services.AddIdentity<AppUser, IdentityRole>()
-                .AddEntityFrameworkStores<AppIdentityDbContext>();
+                .AddEntityFrameworkStores<AppIdentityDbContext>()
+                .AddDefaultTokenProviders();
 
             builder.Services.Configure<IdentityOptions>(options =>
             {
@@ -44,7 +46,14 @@ namespace CinemaApplication.MVC
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
 
-                //options.SignIn.RequireConfirmedEmail = true;
+                options.SignIn.RequireConfirmedEmail = true;
+            });
+
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.ExpireTimeSpan = TimeSpan.FromDays(30); 
+                options.Cookie.IsEssential = true; // Ensure that the cookie is considered essential
+                options.Cookie.HttpOnly = true; // Make the cookie accessible only through HTTP (not JavaScript) for security reasons
             });
 
             /*builder.Services.AddAuthorization(options =>
@@ -58,6 +67,7 @@ namespace CinemaApplication.MVC
 
             builder.Services.AddScoped<IAuthenticationProcedures, AuthenticationProcedures>();
             builder.Services.AddScoped<IAuthorizationProcedures, AuthorizationProcedures>();
+            builder.Services.AddSingleton<IEmailService, EmailService>();
 
             var app = builder.Build();
 

@@ -1,4 +1,5 @@
 ﻿using CinemaApplication.MVC.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
@@ -13,8 +14,15 @@ namespace CinemaApplication.MVC.Controllers
             _logger = logger;
         }
 
-        public IActionResult Index()
+        [AllowAnonymous]
+        public IActionResult Index(bool failedAccountActivation, bool successfulAccountActivation, bool successfulSignIn, 
+            bool successfulPasswordReset, bool failedPasswordReset)
         {
+            ViewData["FailedAccountActivation"] = failedAccountActivation;
+            ViewData["SuccessfulAccountActivation"] = successfulAccountActivation;
+            ViewData["SuccessfulSignIn"] = successfulSignIn;
+            ViewData["SuccessfulPasswordReset"] = successfulPasswordReset;
+            ViewData["FailedPasswordReset"] = failedPasswordReset;
             return View();
         }
 

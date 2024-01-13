@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using CinemaApplication.AuthenticationAndAuthorization.Authentication;
 using CinemaApplication.AuthenticationAndAuthorization;
 using Microsoft.EntityFrameworkCore;
+using System.Xml.XPath;
 
 namespace AuthenticationAndAuthorization.Authentication;
 
@@ -29,10 +30,26 @@ public class AuthenticationProcedures : IAuthenticationProcedures
         return await _userManager.GetUserAsync(_signInManager.Context.User);
     }
 
-    public async Task RegisterUserAsync(AppUser appUser, string password, bool isPersistent, string roleName)
+    public async Task<AppUser> FindByUserIdAsync(string userId)
+    {
+        return await _userManager.FindByIdAsync(userId);
+    }
+
+    public async Task<AppUser> FindByUsernameAsync(string username)
+    {
+        return await _userManager.FindByNameAsync(username);
+    }
+
+    public async Task<AppUser> FindByEmailAsync(string email)
+    {
+        return await _userManager.FindByEmailAsync(email);
+    }
+
+    public async Task<(string, string)> RegisterUserAsync(AppUser appUser, string password, 
+        bool isPersistent, string roleName)
     {
         var executionStrategy = _appIdentityDbContext.Database.CreateExecutionStrategy();
-
+        string confirmationToken = null!;
         await executionStrategy.ExecuteAsync(async () =>
         {
             using (var transaction = await _appIdentityDbContext.Database.BeginTransactionAsync())
@@ -58,8 +75,7 @@ public class AuthenticationProcedures : IAuthenticationProcedures
                         return;
                     }
 
-                    await _signInManager.SignInAsync(appUser, isPersistent);
-
+                    confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(appUser);
                     // If everything is successful, commit the transaction
                     await transaction.CommitAsync();
                 }
@@ -72,8 +88,25 @@ public class AuthenticationProcedures : IAuthenticationProcedures
                 }
             }
         });
+
+        if (confirmationToken != null)
+            return (appUser.Id, confirmationToken);
+        else
+            throw new InvalidOperationException("User registration failed.");
     }
 
+    public async Task<string> CreateResetPasswordTokenAsync(AppUser appUser)
+    {
+        try
+        {
+            return await _userManager.GeneratePasswordResetTokenAsync(appUser);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
 
     public async Task<bool> SignInUserAsync(string username, string password, bool isPersistent)
     {
@@ -127,6 +160,60 @@ public class AuthenticationProcedures : IAuthenticationProcedures
         {
             var result = await _userManager.DeleteAsync(appUser);
             return result.Succeeded;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<bool> ConfirmEmailAsync(string userId, string confirmationToken)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if(user is null)
+            {
+                return false;
+            }
+
+            var result = await _userManager.ConfirmEmailAsync(user, confirmationToken);
+
+            if (!result.Succeeded)
+            {
+                return false;
+            }
+
+            await _signInManager.SignInAsync(user, false);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<bool> ResetPasswordAsync(string userId, string resetPasswordToken, string newPassword)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+            {
+                return false;
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, resetPasswordToken, newPassword);
+
+            if (!result.Succeeded)
+            {
+                return false;
+            }
+
+            await _signInManager.SignInAsync(user, false);
+            return true;
         }
         catch (Exception ex)
         {

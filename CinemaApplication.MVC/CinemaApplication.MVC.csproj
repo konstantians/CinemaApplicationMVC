@@ -9,6 +9,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CinemaApplication.AuthenticationAndAuthorization\CinemaApplication.AuthenticationAndAuthorization.csproj" />
     <ProjectReference Include="..\CinemaApplication.DataAccess\CinemaApplication.DataAccess.csproj" />
+    <ProjectReference Include="..\CinemaApplication.EmailServiceLibrary\CinemaApplication.EmailServiceLibrary.csproj" />
   </ItemGroup>
 
 </Project>
