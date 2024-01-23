@@ -12,7 +12,6 @@ public class AuthorizationProcedures : IAuthorizationProcedures
     {
         _roleManager = identityUserRole;
         _userManager = userManager;
-
     }
 
     public async Task<IEnumerable<IdentityRole>> GetRolesAsync(string roleId)
@@ -62,6 +61,19 @@ public class AuthorizationProcedures : IAuthorizationProcedures
             Console.WriteLine(ex);
             throw;
         }
+    }
+
+    public async Task<string> GetUserRoleAsync(string userId)
+    {
+        var foundUser = await _userManager.FindByIdAsync(userId);
+        if (foundUser is null)
+            return null;
+
+        var foundRoles = await _userManager.GetRolesAsync(foundUser);
+        if (foundRoles is null)
+            return null;
+
+        return foundRoles.FirstOrDefault();
     }
 
     public async Task CreateRoleAsync(string roleName)
@@ -119,7 +131,7 @@ public class AuthorizationProcedures : IAuthorizationProcedures
         }
     }
 
-    public async Task<IEnumerable<AppUser>> GetUsersWithRoleAsync(string roleId)
+    public async Task<IEnumerable<AppUser>> GetUsersOfRoleAsync(string roleId)
     {
         try
         {

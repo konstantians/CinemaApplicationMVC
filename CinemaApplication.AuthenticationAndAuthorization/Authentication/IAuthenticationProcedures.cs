@@ -4,9 +4,9 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Authentication;
 
 public interface IAuthenticationProcedures
 {
-    bool CheckIfUserIsLoggedIn();
+    Task<bool> CheckIfUserIsLoggedIn();
     Task<bool> DeleteUserAccountAsync(AppUser appUser);
-    Task<AppUser> getCurrentUserAsync();
+    Task<AppUser> GetCurrentUserAsync();
     Task<AppUser> FindByUserIdAsync(string userId);
     Task<AppUser> FindByUsernameAsync(string username);
     Task<AppUser> FindByEmailAsync(string email);
@@ -17,4 +17,7 @@ public interface IAuthenticationProcedures
     Task<bool> ConfirmEmailAsync(string userId, string confirmationToken);
     Task<string> CreateResetPasswordTokenAsync(AppUser appUser);
     Task<bool> ResetPasswordAsync(string userId, string resetPasswordToken, string newPassword);
+    Task<bool> ChangePasswordAsync(AppUser appUser, string currentPassword, string newPassword);
+    Task<string> CreateChangeEmailTokenAsync(AppUser appUser, string newEmail);
+    Task<bool> ChangeEmailAsync(string userId, string changeEmailToken, string newEmail);
 }

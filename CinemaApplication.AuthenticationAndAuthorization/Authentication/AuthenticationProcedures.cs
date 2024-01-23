@@ -1,11 +1,9 @@
-﻿
-using CinemaApplication.AuthenticationAndAuthorization.Authorization;
+﻿using CinemaApplication.AuthenticationAndAuthorization.Authorization;
 using CinemaApplication.SharedModels;
 using Microsoft.AspNetCore.Identity;
 using CinemaApplication.AuthenticationAndAuthorization.Authentication;
 using CinemaApplication.AuthenticationAndAuthorization;
 using Microsoft.EntityFrameworkCore;
-using System.Xml.XPath;
 
 namespace AuthenticationAndAuthorization.Authentication;
 
@@ -25,7 +23,7 @@ public class AuthenticationProcedures : IAuthenticationProcedures
 
     }
 
-    public async Task<AppUser> getCurrentUserAsync()
+    public async Task<AppUser> GetCurrentUserAsync()
     {
         return await _userManager.GetUserAsync(_signInManager.Context.User);
     }
@@ -108,6 +106,33 @@ public class AuthenticationProcedures : IAuthenticationProcedures
         }
     }
 
+    public async Task<bool> ChangePasswordAsync(AppUser appUser, string currentPassword, string newPassword)
+    {
+        try
+        {
+            var result = await _userManager.ChangePasswordAsync(appUser, currentPassword, newPassword);
+            return result.Succeeded;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<string> CreateChangeEmailTokenAsync(AppUser appUser, string newEmail)
+    {
+        try
+        {
+            return await _userManager.GenerateChangeEmailTokenAsync(appUser, newEmail);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
     public async Task<bool> SignInUserAsync(string username, string password, bool isPersistent)
     {
         try
@@ -122,10 +147,15 @@ public class AuthenticationProcedures : IAuthenticationProcedures
         }
     }
 
-    public bool CheckIfUserIsLoggedIn()
+    public async Task<bool> CheckIfUserIsLoggedIn()
     {
-        return _signInManager.IsSignedIn(_signInManager.Context.User);
+        return await Task.Run(() => _signInManager.IsSignedIn(_signInManager.Context.User));
     }
+
+    /*public bool CheckIfAccountEmailIsActivated()
+    {
+        return _userManager.(_signInManager.Context.User);
+    }*/
 
     public async Task<bool> UpdateUserAccountAsync(AppUser appUser)
     {
@@ -145,7 +175,7 @@ public class AuthenticationProcedures : IAuthenticationProcedures
     {
         try
         {
-            await _signInManager.SignOutAsync();
+            await _signInManager.SignOutAsync().ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -206,6 +236,33 @@ public class AuthenticationProcedures : IAuthenticationProcedures
             }
 
             var result = await _userManager.ResetPasswordAsync(user, resetPasswordToken, newPassword);
+
+            if (!result.Succeeded)
+            {
+                return false;
+            }
+
+            await _signInManager.SignInAsync(user, false);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<bool> ChangeEmailAsync(string userId, string changeEmailToken, string newEmail)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+            {
+                return false;
+            }
+
+            var result = await _userManager.ChangeEmailAsync(user, newEmail, changeEmailToken);
 
             if (!result.Succeeded)
             {

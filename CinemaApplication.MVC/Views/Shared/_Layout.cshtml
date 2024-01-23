@@ -33,7 +33,7 @@
                         <li class="nav-item me-1">
                             <a class="nav-link" asp-controller="Home" asp-action="CinemaProgram">Cinema Program</a>
                         </li>
-                        @if (!_authenticationProcedures.CheckIfUserIsLoggedIn())
+                        @if(!(await _authenticationProcedures.CheckIfUserIsLoggedIn()))
                         {
                             <li class="nav-item">
                                 <a class="nav-link btn btn-outline-primary my-2 my-sm-0" asp-controller="Account" asp-action="SignIn">Sign In</a>
