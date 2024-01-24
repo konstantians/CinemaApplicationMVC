@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CinemaApplication.DataAccess.Repositories;
 
-internal class MovieDataAccess : IMovieDataAccess
+public class MovieDataAccess : IMovieDataAccess
 {
     private readonly AppDbContext _context;
     private readonly IMovieProjectionDataAccess _movieProjectionDataAccess;
@@ -22,7 +22,7 @@ internal class MovieDataAccess : IMovieDataAccess
                 .Include(movie => movie.Projections)
                 .ThenInclude(projection => projection.CinemaRoom)
                 .Include(movie => movie.Projections)
-                .ThenInclude(projection => projection.Reservations)
+                .ThenInclude(projection => projection.Tickets)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -40,7 +40,7 @@ internal class MovieDataAccess : IMovieDataAccess
                .Include(movie => movie.Projections)
                .ThenInclude(projection => projection.CinemaRoom)
                .Include(movie => movie.Projections)
-               .ThenInclude(projection => projection.Reservations)
+               .ThenInclude(projection => projection.Tickets)
                .FirstOrDefaultAsync(movie => movie.Id == id);
 
         }
@@ -75,11 +75,11 @@ internal class MovieDataAccess : IMovieDataAccess
             if (foundMovie is null)
                 return;
 
-            foundMovie.Name = movie.Name;
-            foundMovie.Length = movie.Length;
+            foundMovie.Title = movie.Title;
+            foundMovie.FilmDuration = movie.FilmDuration;
             foundMovie.Director = movie.Director;
-            foundMovie.Summary = movie.Summary;
-            foundMovie.Type = movie.Type;
+            foundMovie.Description = movie.Description;
+            foundMovie.Category = movie.Category;
 
             await _context.SaveChangesAsync();
         }

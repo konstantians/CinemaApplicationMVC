@@ -2,7 +2,7 @@
 
 namespace CinemaApplication.DataAccess.Repositories;
 
-internal interface IMovieDataAccess
+public interface IMovieDataAccess
 {
     Task<int> CreateMovieAsync(Movie movie);
     Task DeleteMovieAsync(int id);

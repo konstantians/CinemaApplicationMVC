@@ -4,6 +4,7 @@ using DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CinemaApplication.DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240124160602_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -310,20 +313,17 @@ namespace CinemaApplication.DataAccess.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("AirDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("CinemaRoomId")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("EndingTime")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("MovieId")
                         .HasColumnType("int");
 
                     b.Property<int>("SeatsLeft")
                         .HasColumnType("int");
-
-                    b.Property<DateTime>("StartingTime")
-                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

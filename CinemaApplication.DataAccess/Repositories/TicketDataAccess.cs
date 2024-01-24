@@ -4,19 +4,19 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CinemaApplication.DataAccess.Repositories;
 
-public class ReservationDataAccess : IReservationDataAccess
+public class TicketDataAccess : ITicketDataAccess
 {
     private readonly AppDbContext _context;
-    public ReservationDataAccess(AppDbContext context)
+    public TicketDataAccess(AppDbContext context)
     {
         _context = context;
     }
 
-    public async Task<IEnumerable<Reservation>> GetReservationsAsync()
+    public async Task<IEnumerable<Ticket>> GetReservationsAsync()
     {
         try
         {
-            return await _context.Reservations
+            return await _context.Tickets
                 .Include(reservation => reservation.MovieProjection)
                 .ThenInclude(projection => projection.CinemaRoom)
                 .Include(reservation => reservation.MovieProjection)
@@ -30,11 +30,11 @@ public class ReservationDataAccess : IReservationDataAccess
         }
     }
 
-    public async Task<Reservation> GetReservationAsync(int id)
+    public async Task<Ticket> GetReservationAsync(int id)
     {
         try
         {
-            return await _context.Reservations
+            return await _context.Tickets
                 .Include(reservation => reservation.MovieProjection)
                 .ThenInclude(projection => projection.CinemaRoom)
                 .Include(reservation => reservation.MovieProjection)
@@ -49,11 +49,11 @@ public class ReservationDataAccess : IReservationDataAccess
         }
     }
 
-    public async Task<int> CreateReservationAsync(Reservation reservation)
+    public async Task<int> CreateReservationAsync(Ticket reservation)
     {
         try
         {
-            var result = await _context.Reservations.AddAsync(reservation);
+            var result = await _context.Tickets.AddAsync(reservation);
             await _context.SaveChangesAsync();
 
             return result.Entity.Id;
@@ -65,15 +65,15 @@ public class ReservationDataAccess : IReservationDataAccess
         }
     }
 
-    public async Task UpdateReservationAsync(int id, Reservation reservation)
+    public async Task UpdateReservationAsync(int id, Ticket reservation)
     {
         try
         {
-            Reservation foundReservation = await GetReservationAsync(id);
+            Ticket foundReservation = await GetReservationAsync(id);
             if (foundReservation is null)
                 return;
 
-            foundReservation.ReservationRefoundPrice = reservation.ReservationRefoundPrice;
+            foundReservation.ReservationRefundPrice = reservation.ReservationRefundPrice;
             foundReservation.NumberOfSeats = reservation.NumberOfSeats;
             await _context.SaveChangesAsync();
         }
@@ -88,8 +88,8 @@ public class ReservationDataAccess : IReservationDataAccess
     {
         try
         {
-            Reservation foundReservation = await GetReservationAsync(id);
-            _context.Reservations.Remove(foundReservation);
+            Ticket foundReservation = await GetReservationAsync(id);
+            _context.Tickets.Remove(foundReservation);
             await _context.SaveChangesAsync();
         }
         catch (Exception ex)

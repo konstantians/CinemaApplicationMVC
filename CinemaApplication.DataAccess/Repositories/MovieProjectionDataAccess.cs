@@ -7,8 +7,8 @@ namespace CinemaApplication.DataAccess.Repositories;
 public class MovieProjectionDataAccess : IMovieProjectionDataAccess
 {
     private readonly AppDbContext _context;
-    private readonly IReservationDataAccess _reservationDataAccess;
-    public MovieProjectionDataAccess(AppDbContext context, IReservationDataAccess reservationDataAccess)
+    private readonly ITicketDataAccess _reservationDataAccess;
+    public MovieProjectionDataAccess(AppDbContext context, ITicketDataAccess reservationDataAccess)
     {
         _context = context;
         _reservationDataAccess = reservationDataAccess;
@@ -19,7 +19,7 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
         try
         {
             return await _context.MovieProjections
-                .Include(projection => projection.Reservations)
+                .Include(projection => projection.Tickets)
                 .Include(projection => projection.CinemaRoom)
                 .Include(projection => projection.Movie)
                 .ToListAsync();
@@ -36,7 +36,7 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
         try
         {
             return await _context.MovieProjections
-                .Include(projection => projection.Reservations)
+                .Include(projection => projection.Tickets)
                 .Include(projection => projection.CinemaRoom)
                 .Include(projection => projection.Movie)
                 .FirstOrDefaultAsync(projection => projection.Id == id);
@@ -74,7 +74,8 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
                 return;
 
             foundProjection.SeatsLeft = projection.SeatsLeft;
-            foundProjection.AirDate = projection.AirDate;
+            foundProjection.StartingTime = projection.StartingTime;
+            foundProjection.EndingTime = projection.EndingTime;
             await _context.SaveChangesAsync();
         }
         catch (Exception ex)
@@ -89,7 +90,7 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
         try
         {
             MovieProjection foundMovieProjection = await GetMovieProjectionAsync(id);
-            foreach (Reservation reservation in foundMovieProjection.Reservations)
+            foreach (Ticket reservation in foundMovieProjection.Tickets)
             {
                 await _reservationDataAccess.DeleteReservationAsync(reservation.Id);
             }

@@ -1,5 +1,295 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@inject IAuthenticationProcedures _authenticationProcedures;
+@model List<Movie>
+
 @{
+    ViewData["Title"] = "Cinema Program";
+    bool isSignedIn = await _authenticationProcedures.CheckIfUserIsLoggedIn();
+    int count = 0;
+}
+
+<style>
+    .accordion-button {
+        background-color: white; /* --bs-accordion-button-bg equivalent */
+        color: #333; /* --bs-accordion-button-color equivalent */
+        border: 1px solid #c8c9ca; /* --bs-accordion-border-color equivalent */
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color : black !important;
+        color: white;
+    }
+
+    .accordion-button::after {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-plus-circle' viewBox='0 0 16 16'%3E%3Cpath d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z'/%3E%3Cpath d='M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z'/%3E%3C/svg%3E");
+    }
+
+    .accordion-button:not(.collapsed)::after {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='currentColor' class='bi bi-dash' viewBox='0 0 16 16'%3E%3Cpath d='M4 8a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7A.5.5 0 0 1 4 8z'/%3E%3C/svg%3E");
+        background-color: white !important;
+    }
+
+    .accordion-striped .accordion-button {
+        background-color: #ececec;
+    }
+
+    .error-message {
+        color: red !important;
+        font-size: 14px !important;
+
+    }
+
+    .error-container {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .error-container a {
+        margin-top: 4px;
+    }
+</style>
+
+<div class="container">
+    <h2 class="text-center mb-3">Movies In Cinema Right Now!</h2>
+    <div class="offset-2 col-8 mb-4">
+        <div class="accordion shadow" id="cinemaMenuProgramAccordion">
+            @foreach (Movie movie in Model){                
+                var startingTimeComparator = Comparer<MovieProjection>.Create((p1, p2) => p1.StartingTime.CompareTo(p2.StartingTime));
+                movie.Projections.Sort(startingTimeComparator);
+                
+                <div class="accordion-item">
+                    @if(count % 2 == 0){
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@movie.Title.GetHashCode()"
+                                aria-expanded="false" aria-controls="collapse-@movie.Title.GetHashCode()">
+                                @movie.Title
+                            </button>
+                        </h2>
+                    }
+                    else {
+                        <h2 class="accordion-header accordion-striped" id="headingOne">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@movie.Title.GetHashCode()" 
+                                aria-expanded="false" aria-controls="collapse-@movie.Title.GetHashCode()">
+                                @movie.Title
+                            </button>
+                        </h2>
+                    }
+                    <div id="collapse-@movie.Title.GetHashCode()" class="accordion-collapse collapse" aria-labelledby="headingOne">
+                        <div class="accordion-body">
+                            <table class="table table-bordered table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Starting Hour</th>
+                                        <th>Ending Hour</th>
+                                        <th>Room</th>
+                                        <th>Tickets</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (MovieProjection projection in movie.Projections)
+                                    {
+
+                                        if (projection.StartingTime > DateTime.Now && projection.StartingTime < DateTime.Now.AddDays(7))
+                                        {
+                                            <tr>
+                                                @{
+                                                    string dayName = projection.StartingTime.ToString("ddd dd/MM", System.Globalization.CultureInfo.GetCultureInfo("en-US"));
+                                                    dayName = dayName.Substring(0, 3);
+                                                }
+
+                                                <td>@dayName</td>
+                                                <td>@projection.StartingTime.Hour : @projection.StartingTime.Minute</td>
+                                                <td>@projection.EndingTime.Hour : @projection.EndingTime.Minute</td>
+                                                <td>@projection.CinemaRoomId</td>
+                                                <td>
+
+                                                    <a class="btn btn-sm btn-outline-primary" onclick="checkConditionAndShowModal(event, @projection.Id, @isSignedIn)">
+                                                        Get Tickets
+                                                    </a>
+                                                    <!-- Modal To Add Tickets -->
+                                                    <div class="modal fade" id="getTicketsModal-@projection.Id" tabindex="-1" role="dialog">
+                                                        @{
+                                                            string reservationsId = "reservations-" + projection.Id;
+                                                            string bankCardId = "bankCardNumber-" + projection.Id;
+                                                            string formId = "getTicketsForm-" + projection.Id;
+                                                            string projectionId = "projectionId-" + projection.Id;
+                                                        }
+                                                        <form id="getTicketsForm-@projection.Id method="post"
+                                                              onsubmit="validateGetTicketsForm(event, '@reservationsId', '@bankCardId' , '@formId', '@projectionId')"
+                                                              asp-action="PurchaseTicket" asp-controller="Home">
+                                                            <div class="modal-dialog">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title" id="createProjectionTitle">Purchase Tickets Form</h5>
+                                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                                    </div>
+                                                                    <div class="modal-body" style="text-align: left;">
+                                                                        <div class="container">
+                                                                            <div class="row">
+                                                                                <div class="row mb-3">
+                                                                                    <div class="col-6">
+                                                                                        <label for="projectionId-@projection.Id" class="form-label">Projection Identifier:</label>
+                                                                                        <input type="text" class="form-control" id="projectionId-@projection.Id"
+                                                                                               name="projectionId" value="@projection.Id" disabled>
+                                                                                    </div>
+                                                                                    <div class=" col-6">
+                                                                                        <label for="projectionRoomId-@projection.Id" class="form-label">Projection Room Identifier:</label>
+                                                                                        <input type="text" class="form-control" id="projectionRoomId-@projection.Id"
+                                                                                               name="projectionRoomId" value="@projection.CinemaRoomId" disabled>
+                                                                                    </div>
+                                                                                </div>
+                                                                                @* TODO this is for transactions*@
+                                                                                @* <div class="row mb-3">
+                                                                                    <div class="col-12">
+                                                                                    <label for="bankCardNumber-@projection.Id" class="form-label">BankCard CardNumber:</label>
+                                                                                    <select onfocus="clearErrorMessage(this.id)" name="bankCardNumber" class="form-select" id="bankCardNumber-@projection.Id">
+                                                                                    <option value="-1">Select A BankCard For The Transaction</option>
+                                                                                    <% for(BankCardDataModel bankCard :
+                                                                                    UserDataAccess.getUser((String)request.getSession().getAttribute("globalUserUsername")).getBankCards()) { %>
+                                                                                    <option value="<%=bankCard.getCardNumber()%>">BankCard Number: <%= bankCard.getCardNumber() %></option>
+                                                                                    <% } %>
+                                                                                    </select>
+                                                                                    <span id="bankCardNumber-<%=projection.getId()%>Error" class="error-message"></span>
+                                                                                    </div>
+                                                                                    </div> *@
+                                                                                <div class="row">
+                                                                                    <div class="col-4">
+                                                                                        <label for="reservations-@projection.Id" class="form-label">Ticket Count:</label>
+                                                                                    </div>
+                                                                                    <div class="col-4">
+                                                                                        <label for="refundPrice-@projection.Id" class="form-label">Ticket Price:</label>
+                                                                                    </div>
+                                                                                    <div class="col-4">
+                                                                                        <label for="finalPrice-@projection.Id" class="form-label ms-2">Final Price:</label>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="row mb-3">
+                                                                                    <div class="input-group mb-3">
+                                                                                        <input onfocus="clearErrorMessage(this.id)" onchange="updateFinalPrice(this.id)" type="number" class="form-control" id="reservations-@projection.Id-"
+                                                                                               name="reservationsCount" value="1">
+                                                                                        <span class="input-group-text text-white bg-dark" id="basic-addon1">&times;</span>
+                                                                                        <input type="text" class="form-control" id="refundPrice-@projection.Id"
+                                                                                               name="refundPrice" value="10€" disabled>
+                                                                                        <span class="input-group-text text-white bg-dark" id="basic-addon2">&equals;</span>
+                                                                                        <input type="text" class="form-control" id="reservations-@projection.Id-finalPrice"
+                                                                                               name="finalPrice" value="10€" disabled>
+                                                                                    </div>
+                                                                                    <span id="reservations-@projection.Id-Error" class="error-message"></span>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button type="submit" class="btn btn-primary">Complete Purchase</button>
+                                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                count += 1;
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+
+        function checkConditionAndShowModal(event, projectionId, showModalCondition) {
+            // Your condition check here
+            if (showModalCondition === true) {
+                // Condition is met, prevent modal from showing
+                event.preventDefault();
+                alert("Condition not met. Cannot show the modal.");
+            } else {
+                // Condition is not met, proceed to show the modal
+                let modalId = "#getTicketsModal-" + projectionId;
+                $(modalId).modal('show'); // Assuming you're using Bootstrap modal
+            }
+        }
+
+        //checks for empty fields and other constraints for the get tickets form
+        function validateGetTicketsForm(event, reservationsId, bankCardsId, formId, projectionId) {
+            event.preventDefault(); // Prevent the default form submission
+
+            let bankCardValue = document.getElementById(bankCardsId).value;
+            let reservationsIdValue = document.getElementById(reservationsId).value;
+            let hasError = false;
+
+            // Check if the field is empty or the reservation amount is wrong
+            if (reservationsIdValue === "" ||
+                (parseInt(reservationsIdValue) < 1 || parseInt(reservationsIdValue) > 10)) {
+                displayErrorMessage("The minimum amount of tickets is 1 and the maximum amount is 10",
+                    reservationsId + "Error");
+                hasError = true;
+            } else {
+                clearErrorMessage(reservationsId);
+            }
+
+            // Check if the selected value for bank card number is the default ("-1")
+            if (bankCardValue === "-1") {
+                displayErrorMessage("Please select a bank card", bankCardsId + "Error");
+                hasError = true;
+            } else {
+                clearErrorMessage(bankCardsId);
+            }
+
+            if (!hasError) {
+                document.getElementById(projectionId).disabled = false;
+                document.getElementById(reservationsId).disabled = false;
+                document.getElementById(formId).submit();
+            }
+        }
+
+        function clearErrorMessage(errorElement) {
+            let errorMessage = document.getElementById(errorElement + "Error");
+            errorMessage.textContent = "";
+        }
+
+        function displayErrorMessage(message, errorId) {
+            let errorMessageElement = document.getElementById(errorId);
+            if (errorMessageElement) {
+                errorMessageElement.textContent = message;
+            } else {
+                let errorContainer = document.createElement("div");
+                errorContainer.className = "error-container";
+                let errorMessage = document.createElement("span");
+                errorMessage.className = "error-message";
+                errorMessage.textContent = message;
+                errorContainer.appendChild(errorMessage);
+                let inputField = document.getElementById(errorId.replace("Error", ""));
+                if (inputField) {
+                    let parentDiv = inputField.parentNode;
+                    parentDiv.appendChild(errorContainer);
+                }
+            }
+        }
+
+        function updateFinalPrice(reservationsId) {
+            let reservationsValue = document.getElementById(reservationsId).value;
+            let finalPrice = document.getElementById(reservationsId + "finalPrice");
+
+            if (reservationsValue < 1 || reservationsValue > 10)
+                finalPrice.value = "invalid amount";
+            else {
+                let finalPriceValue = 10 * parseInt(reservationsValue);
+                finalPrice.value = finalPriceValue + "€";
+            }
+        }
+    </script>
+
 }

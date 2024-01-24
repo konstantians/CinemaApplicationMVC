@@ -7,6 +7,7 @@ using DataAccess;
 using AuthenticationAndAuthorization.Authentication;
 using CinemaApplication.AuthenticationAndAuthorization;
 using CinemaApplication.EmailServiceLibrary;
+using CinemaApplication.DataAccess.Repositories;
 
 namespace CinemaApplication.MVC
 {
@@ -68,6 +69,11 @@ namespace CinemaApplication.MVC
             builder.Services.AddScoped<IAuthenticationProcedures, AuthenticationProcedures>();
             builder.Services.AddScoped<IAuthorizationProcedures, AuthorizationProcedures>();
             builder.Services.AddSingleton<IEmailService, EmailService>();
+
+            builder.Services.AddScoped<ITicketDataAccess, TicketDataAccess>();
+            builder.Services.AddScoped<ICinemaRoomDataAccess, CinemaRoomDataAccess>();
+            builder.Services.AddScoped<IMovieProjectionDataAccess, MovieProjectionDataAccess>();
+            builder.Services.AddScoped<IMovieDataAccess, MovieDataAccess>();
 
             var app = builder.Build();
 

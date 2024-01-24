@@ -23,16 +23,31 @@
                 </button>
                 <div class="collapse navbar-collapse d-sm-inline-flex justify-content-end" id="navbarSupportedContent">
                     <ul class="navbar-nav">
+                        
+                        @{
+                            var result = await _authenticationProcedures.GetCurrentUserAsync();
+                            string userId = result is null ? "" : result.Id;
+                        }
+                        @if (await _authenticationProcedures.CheckIfUserIsLoggedIn()
+                        && (await _authorizationProcedures.GetUserRoleAsync(userId)) == "Content Admin")
+                        {
                         <li class="nav-item me-1">
                             <a class="nav-link" asp-controller="ContentAdmin" asp-action="ManageFilms">Manage Films</a>
                         </li>
-                         <li class="nav-item me-1">
-                            <a class="nav-link" asp-controller="Admin" asp-action="ManageUsers">Manage Users</a>
-                        </li>
-
+                        }
+                        else if (await _authenticationProcedures.CheckIfUserIsLoggedIn() 
+                            && (await _authorizationProcedures.GetUserRoleAsync(userId)) == "Admin")
+                        {
+                            <li class="nav-item me-1">
+                                <a class="nav-link" asp-controller="Admin" asp-action="ManageUsers">Manage Users</a>
+                            </li>
+                        }
+                        
                         <li class="nav-item me-1">
                             <a class="nav-link" asp-controller="Home" asp-action="CinemaProgram">Cinema Program</a>
                         </li>
+                        
+
                         @if(!(await _authenticationProcedures.CheckIfUserIsLoggedIn()))
                         {
                             <li class="nav-item">

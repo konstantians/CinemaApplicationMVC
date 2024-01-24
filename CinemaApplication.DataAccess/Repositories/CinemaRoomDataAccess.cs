@@ -22,7 +22,7 @@ public class CinemaRoomDataAccess : ICinemaRoomDataAccess
                 .Include(cinameRoom => cinameRoom.Projections)
                 .ThenInclude(projection => projection.Movie)
                 .Include(cinemaRoom => cinemaRoom.Projections)
-                .ThenInclude(projection => projection.Reservations)
+                .ThenInclude(projection => projection.Tickets)
                 .ToListAsync();
         }
         catch (Exception ex)
@@ -40,7 +40,7 @@ public class CinemaRoomDataAccess : ICinemaRoomDataAccess
                 .Include(cinameRoom => cinameRoom.Projections)
                 .ThenInclude(projection => projection.Movie)
                 .Include(cinemaRoom => cinemaRoom.Projections)
-                .ThenInclude(projection => projection.Reservations)
+                .ThenInclude(projection => projection.Tickets)
                 .FirstOrDefaultAsync(cinemaRoom => cinemaRoom.Id == id);
 
         }
