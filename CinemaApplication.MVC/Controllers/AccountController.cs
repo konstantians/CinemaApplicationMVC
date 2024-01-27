@@ -197,7 +197,6 @@ public class AccountController : Controller
             await _authenticationProcedures.UpdateUserAccountAsync(appUser);
             await _authenticationProcedures.LogOutUserAsync();
         }
-        //ViewData["EmailSendSuccessfully"] = result;
         return RedirectToAction("EmailChangeVerificationMessage", "Account", new {wasSuccessful = result});
     }
 

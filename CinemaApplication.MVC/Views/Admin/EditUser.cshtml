@@ -1,0 +1,543 @@
+﻿@model EditAccountModel
+
+@{
+    ViewData["Title"] = "Edit User";
+    string emailConfirmText = Model.IsEmailConfirmed ? "Activated" : "Deactivated";
+}
+
+@if ((bool)ViewData["DuplicateUsernameError"]! || (bool)ViewData["DuplicateEmailError"]! ||
+    (bool)ViewData["BasicInformationChangeError"]! || (bool)ViewData["BasicInformationChangeSuccessEmailFailure"]! ||
+    (bool)ViewData["PasswordChangeError"]! || (bool)ViewData["PasswordChangeSuccessEmailFailure"]! ||
+    (bool)ViewData["EmailChangedFailure"]! || (bool)ViewData["EmailChangedSuccessEmailFailure"]! ||
+    (bool)ViewData["AccountStatusChangedFailure"]! || (bool)ViewData["AccountStatusChangedSuccessEmailFailure"]!)
+{
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+        </symbol>
+    </svg>
+    <div class="row">
+        <div class="col-12">
+            @{
+                string alertClass = (bool)ViewData["BasicInformationChangeSuccessEmailFailure"]! || (bool)ViewData["PasswordChangeSuccessEmailFailure"]!
+                || (bool)ViewData["AccountStatusChangedSuccessEmailFailure"]! || (bool)ViewData["EmailChangedSuccessEmailFailure"]! ? "alert-warning" : "alert-danger";
+            }
+            <div class="alert @alertClass d-flex align-items-center alert-dismissible fade show" role="alert">
+                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill" /></svg>
+                @if ((bool)ViewData["DuplicateUsernameError"]!)
+                {
+                    <div>There is another user with the given username. Please pick another username for the user.</div>
+                }
+                else if ((bool)ViewData["DuplicateEmailError"]!)
+                {
+                    <div>There is another user with the given email. Please pick another email for the user.</div>
+                }
+                else if ((bool)ViewData["BasicInformationChangeError"]!)
+                {
+                    <div>
+                        Something went wrong while updating the given user's basic information.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if ((bool)ViewData["BasicInformationChangeSuccessEmailFailure"]!)
+                {
+                    <div>
+                        The user information has been updated successfully, but an email could not be sent to their account.
+                        Please contact them manually to notify them.
+                    </div>
+                }
+                else if ((bool)ViewData["PasswordChangeError"]!)
+                {
+                    <div>
+                        Something went wrong while updating the given user password.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if ((bool)ViewData["PasswordChangeSuccessEmailFailure"]!)
+                {
+                    <div>
+                        The user password has been updated successfully, but an email could not be sent to their account.
+                        Please contact them manually to notify them.
+                    </div>
+                }
+                else if ((bool)ViewData["EmailChangedFailure"]!)
+                {
+                    <div>
+                        Something went wrong while updating the given user email.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if ((bool)ViewData["EmailChangedSuccessEmailFailure"]!)
+                {
+                    <div>
+                        The user email has been updated successfully, but an email could not be sent to their account.
+                        Please contact them manually to notify them.
+                    </div>
+                }
+                else if ((bool)ViewData["AccountStatusChangedFailure"]!)
+                {
+                    <div>
+                        Something went wrong while updating the given user's account status.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if ((bool)ViewData["AccountStatusChangedSuccessEmailFailure"]!){
+                    <div>
+                        The user account status has been updated successfully, but an email could not be sent to their account. 
+                        Please contact them manually to notify them.
+                    </div>
+                }
+                
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["PasswordChangeSuccess"]! || 
+         (bool)ViewData["AccountStatusChangedSuccess"]! || (bool)ViewData["EmailChangedSuccess"]!)
+{
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+        </symbol>
+    </svg>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert">
+                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill" /></svg>
+                @if ((bool)ViewData["BasicInformationChangeSuccess"]!)
+                {
+                    <div>The given user's basic information has been updated successfully and an email has been sent to them to notify them of their account changes!</div>
+                }
+                else if ((bool)ViewData["PasswordChangeSuccess"]!)
+                {
+                    <div>The given user's password has been updated successfully and an email has been sent to them to notify them of their account changes!</div>
+                }
+                else if ((bool)ViewData["AccountStatusChangedSuccess"]!)
+                {
+                    <div>The given user's account status has been updated successfully and an email has been sent to them to notify them of their account changes!</div>
+                }
+                else if ((bool)ViewData["EmailChangedSuccess"]!)
+                {
+                    <div>The given user's email has been updated successfully and an email has been sent to them to notify them of their account changes!</div>
+                }
+                @* else if(request.getSession().getAttribute("deleteTicketSuccessMessage") != null){%>
+            <div>The ticket has been refunded successfully!</div>
+            <% request.getSession().removeAttribute("deleteTicketSuccessMessage"); %>
+            <%}else if(request.getSession().getAttribute("deleteBankCardSuccessMessage") != null){%>
+            <div>The bank card was removed successfully!</div>
+            <% request.getSession().removeAttribute("deleteBankCardSuccessMessage"); %>
+            <%}else if(request.getSession().getAttribute("bankCardCreatedAlert") != null){%>
+            <div>The bank card was successfully added to your account!</div>
+            <% request.getSession().removeAttribute("bankCardCreatedAlert"); %>
+            <%}%> *@
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+
+<div method="post" class="shadow p-4" style="background-color:white;">
+    <h2 class="text-center mb-4">Edit User @Model.AccountBasicSettingsViewModel.Username</h2>
+    <div class="row">
+        <form class="col-4" asp-controller="Admin" asp-action="EditUserBasicAccountSettings">
+            <div class="row">
+                <h4 class="text-center">Basic Account Settings </h4>
+                <div class="col-12 mb-4 mt-1">
+                    <label asp-for="@Model.AccountBasicSettingsViewModel.Username"><i class="fa-solid fa-user me-2"></i>Account Username</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="username" asp-for="@Model.AccountBasicSettingsViewModel.Username"
+                               value="@Model.AccountBasicSettingsViewModel.Username" readOnly>
+                        <a class="btn btn-outline-primary" id="usernameButton" onclick="toggleInputField('username', 'usernameButton')">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.AccountBasicSettingsViewModel.Username" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-4 mt-1">
+                    <label asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"><i class="fa-solid fa-phone me-2"></i>Account Phone Number</label>
+                    <div class="input-group">
+                        <input type="tel" class="form-control" id="phone" asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"
+                               value="@Model.AccountBasicSettingsViewModel.PhoneNumber" readOnly>
+                        <a class="btn btn-outline-primary" id="phoneNumberButton"
+                           onclick="toggleInputField('phone', 'phoneNumberButton')">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.AccountBasicSettingsViewModel.PhoneNumber" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-4 mt-1">
+                    <p>User Account Type</p>
+                    <div class="form-check form-check-inline">
+                        <input checked class="form-check-input" type="radio" id="userRadio"
+                               value="User" asp-for="@Model.AccountBasicSettingsViewModel.AccountType">
+                        <label class="form-check-label" for="userRadio">User</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="contentAdminRadio"
+                               value="ContentAdmin" asp-for="@Model.AccountBasicSettingsViewModel.AccountType">
+                        <label class="form-check-label" for="contentAdminRadio">Content Admin</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="adminRadio"
+                               value="Admin" asp-for="@Model.AccountBasicSettingsViewModel.AccountType">
+                        <label class="form-check-label" for="adminRadio">Admin</label>
+                    </div>
+                </div>
+
+                <input name="userId" value="@ViewData["UserId"]" hidden/>
+                <input name="oldUserRole" value="@Model.AccountBasicSettingsViewModel.AccountType" hidden/>
+                <div class="d-flex justify-content-center mt-5">
+                    <button type="submit" class="btn btn-primary">Confirm Changes</button>
+                </div>
+            </div>
+        </form>
+        <div class="col-4">
+            <div class="row">
+                <h4 class="text-center">Sensitive Account Settings </h4>
+                <div class="col-12 mb-4 mt-1">
+                    <label asp-for="@Model.ChangePasswordModel.OldPassword"><i class="fa-solid fa-lock me-2"></i>Account Password</label>
+                    <div class="input-group">
+                        <input type="password" class="form-control" id="password" asp-for="@Model.ChangePasswordModel.OldPassword"
+                               value="@Model.ChangePasswordModel.OldPassword" readOnly>
+                        <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.ChangePasswordModel.OldPassword" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-4 mt-1">
+                    <label asp-for="@Model.ChangeEmailModel.OldEmail"><i class="fa-solid fa-envelope me-2"></i>Account Email</label>
+                    <div class="input-group">
+                        <input type="email" class="form-control" asp-for="@Model.ChangeEmailModel.OldEmail"
+                               value="@Model.ChangeEmailModel.OldEmail" readOnly>
+                        <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.ChangeEmailModel.OldEmail" class="text-danger"></span>
+                </div>
+                <div class="col-12 mb-4 mt-1">
+                    <label asp-for="@Model.IsEmailConfirmed"><i class="fa-solid fa-envelope-circle-check me-2"></i>Email Confirmed</label>
+                    <div class="input-group">
+                        <input type="email" class="form-control" id="newEmail" asp-for="@Model.IsEmailConfirmed"
+                               value="@emailConfirmText" readOnly>
+                        <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailConfirmationModal">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @* <div class="col-4">
+        <h5 class="text-start">Account Tickets</h5>
+        <ul class="list-group mb-4" id="ticketsList">
+        <% for (Ticket ticket : user.getTickets()) { %>
+        <li class="list-group-item">
+        <div class="d-flex align-items-center justify-content-between">
+        Ticket ID: <%=ticket.getTicketId()%> <br>
+        Title: <%=ProjectionDataAccess.getProjection(ticket.getProjectionId()).getFilmTitle()%> <br>
+        Date: <%=ProjectionDataAccess.getProjection(ticket.getProjectionId()).getStartingTime()%> <br>
+        Seat: <%=ticket.getSeat()%>
+        <div>
+        <a class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal-<%=ticket.getTicketId()%>">
+        <i class="fa-solid fa-trash-can"></i></a>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="deleteModal-<%=ticket.getTicketId()%>" tabindex="-1">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalTitle-<%=ticket.getTicketId()%>">Refund Ticket Dialog</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="text-align: left;">
+        Are you sure you want to refund this ticket?
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a class="btn btn-danger ms-1"
+        href="/deleteTicket?ticketId=<%=ticket.getTicketId()%>">
+        Confirm Refund</a>
+        </div>
+        </div>
+        </div>
+        </div>
+        </div>
+        </li>
+        <%}%>
+        </ul>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="mb-0">Account BankCards</h5>
+        <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#createBankCardModal">
+        <i class="fa-solid fa-plus"></i>
+        </a>
+        </div>
+        <ul class="list-group" id="bankCardsList">
+        <% for (BankCard bankCard : user.getBankCards()) { %>
+        <li class="list-group-item">
+        <div class="d-flex align-items-center justify-content-between">
+        Number: <%=bankCard.getCardNumber()%>
+        <div>
+        <a class="btn btn-primary ms-3" href="/editBankCard?bankCardNumber=<%=bankCard.getCardNumber()%>">
+        <i class="fa fa-eye" aria-hidden="true"></i></a>
+        <a class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal-<%=bankCard.getCardNumber()%>">
+        <i class="fa-solid fa-trash-can"></i></a>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="deleteModal-<%=bankCard.getCardNumber()%>" tabindex="-1">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalTitle-<%=bankCard.getCardNumber()%>">Remove BankCard Dialog</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="text-align: left;">
+        Are you sure you want to remove this bankcard?
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <a class="btn btn-danger ms-1"
+        href="/deleteBankCard?bankCardNumber=<%=bankCard.getCardNumber()%>">
+        Confirm Removal</a>
+        </div>
+        </div>
+        </div>
+        </div>
+        </div>
+        </li>
+        <%}%>
+        </ul>
+        </div> *@
+    </div>
+</div>
+
+
+<!-- Modal To Change Password -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <form id="changePasswordForm" method="post" asp-controller="Admin" asp-action="EditUserPassword">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changePasswordTitle">Change User Password Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="text-align: left;">
+                    <div class="container">
+                        @* TODO maybe add a warning here *@
+                        <div class="row">
+                            <div class=" col-12 mb-3">
+                                <label asp-for="ChangePasswordModel.NewPassword" class="form-label">New Password</label>
+                                <input asp-for="ChangePasswordModel.NewPassword" class="form-control" type="password" />
+                                <span asp-validation-for="ChangePasswordModel.NewPassword" class="text-danger"></span>
+                            </div>
+                            <div class=" col-12 mb-3">
+                                <label asp-for="ChangePasswordModel.ConfirmNewPassword" class="form-label">Confirm New Password</label>
+                                <input asp-for="ChangePasswordModel.ConfirmNewPassword" class="form-control" type="password">
+                                <span asp-validation-for="ChangePasswordModel.ConfirmNewPassword" class="text-danger"></span>
+                            </div>
+                            <input asp-for="ChangePasswordModel.OldPassword" value="OldPassword123!" hidden />
+                            <input name="userId" value="@ViewData["UserId"]" hidden/>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Modal to Change Email Address -->
+<div class="modal fade" id="changeEmailModal" tabindex="-1">
+    <form id="changeEmailForm" method="post" asp-controller="Admin" asp-action="ChangeUserEmail" onsubmit="enableAll()">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeEmailTitle">Change Email Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="text-align: left;">
+                    <div class="container">
+                        @* TODO maybe add a warning here *@
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label asp-for="ChangeEmailModel.OldEmail" class="form-label">Old Email</label>
+                                <input asp-for="ChangeEmailModel.OldEmail" type="text" class="form-control" readOnly>
+                            </div>
+                            <div class=" col-12 mb-3">
+                                <label asp-for="ChangeEmailModel.NewEmail" class="form-label">New Email</label>
+                                <input asp-for="ChangeEmailModel.NewEmail" type="text" class="form-control"><br />
+                            </div>
+                            <input name="userId" value="@ViewData["UserId"]" hidden />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="changeEmailConfirmationModal" tabindex="-1">
+    <form id="changeEmailConfirmationForm" method="post" asp-controller="Admin" asp-action="ChangeEmailConfirmation">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changeEmailTitle">Change Email Confirmation Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="text-align: left;">
+                    <div class="container">
+                        @* TODO maybe add a warning here *@
+                        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                            <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                            </symbol>
+                        </svg>
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill" /></svg>
+                            <div>
+                                If you decide to deactivate a user account the user will not be able to login.<br />
+                                Type "Activated" in the textbox below to activate the account or "Deactivated" to deactivate it.
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class=" col-12 mb-3">
+                                <label class="form-label" for="currentEmailStatusInput">Current Email Status</label>
+                                <input type="text" class="form-control" name="currentEmailStatus" id="currentEmailStatusInput" value="@emailConfirmText" readOnly>
+                            </div>
+                            <div class=" col-12 mb-3">
+                                <label class="form-label" for="newEmailStatusInput">New Email Status</label>
+                                <input name="newEmailStatus" id="newEmailStatusInput" type="text" class="form-control" value="">
+                                <span class="text-danger" id="newEmailStatusErrorMessage" hidden></span>
+                            </div>
+                            <input value="@ViewData["UserId"]" name="userId" hidden />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary" onclick="return checkEmailConfirmationFormSubmission();">Submit</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<!-- Modal To Add BankCard -->
+<div class="modal fade" id="createBankCardModal" tabindex="-1">
+    <form id="createBankCardForm" method="post" onsubmit="validateBankCardForm(event)"
+          action="/films/createBankCard">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createProjectionTitle">New BankCard Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="text-align: left;">
+
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="cardNumber" class="form-label">Card Number:</label>
+                                <input type="text" class="form-control" id="cardNumber"
+                                       name="cardNumber">
+                                <span id="cardNumberError" class="error-message"></span>
+                            </div>
+                            <div class=" col-12 mb-3">
+                                <label for="cardHolderName" class="form-label">CardHolder Name:</label>
+                                <input type="text" class="form-control" id="cardHolderName"
+                                       name="cardHolderName">
+                                <span id="cardHolderNameError" class="error-message"></span>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label for="cvc" class="form-label">CVC:</label>
+                                    <input type="password" class="form-control" id="cvc" name="cvc">
+                                    <span id="cvcError" class="error-message"></span>
+                                </div>
+                                <div class="col-6">
+                                    <label for="expirationDate" class="form-label">ExpirationDate:</label>
+                                    <input type="month" class="form-control" id="expirationDate" name="expirationDate">
+                                    <span id="expirationDateError" class="error-message"></span>
+                                </div>
+                            </div>
+                            <input name="userUsername" value="<%= user.getUsername() %>" type="hidden">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Add BankCard</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        //edit button functionality
+        function toggleInputField(inputId, buttonId) {
+            let inputField = document.getElementById(inputId);
+            let button = document.getElementById(buttonId);
+
+            if (inputField && button) {
+                if (inputField.readOnly) {
+                    inputField.readOnly = false;
+                    button.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else {
+                    inputField.readOnly = true;
+                    button.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                }
+            }
+        }
+
+        //enable all the fields, if that does not happen then the values will not be sent to the servlet
+        //function enableAll() {
+            //document.getElementById("username").disabled = false;
+            //document.getElementById("phone").disabled = false;
+        //}
+        
+        function checkEmailConfirmationFormSubmission(){
+            // Get form and input elements
+            //let form = document.getElementById('changeEmailConfirmationForm');
+            let newEmailStatusErrorMessage = document.getElementById('newEmailStatusErrorMessage');
+            let currentEmailStatusInput = document.getElementById('currentEmailStatusInput');
+            let newEmailStatusInput = document.getElementById('newEmailStatusInput');
+
+            // Get the values of the inputs
+            currentEmailStatusInput.readOnly = false;
+            let currentEmailStatus = currentEmailStatusInput.value.trim().toLowerCase();
+            let newEmailStatus = newEmailStatusInput.value.trim().toLowerCase();
+
+            // Check if the values are not correct (e.g., not "activated" or "deactivated")
+            if ((currentEmailStatus === 'activated' && newEmailStatus !== 'deactivated') ||
+                (currentEmailStatus === 'deactivated' && newEmailStatus !== 'activated')) {
+                // Values are not correct, prevent the form submission
+                newEmailStatusInput.value = "";
+                newEmailStatusErrorMessage.textContent = currentEmailStatus === 'deactivated' ? 'You need to type "activated" and then submit the form' :
+                'You need to type "deactivated" and then submit the form';
+                newEmailStatusErrorMessage.removeAttribute('hidden');
+
+                return false;
+            }
+            return true;
+        }
+            
+    </script>
+}
+
+
+

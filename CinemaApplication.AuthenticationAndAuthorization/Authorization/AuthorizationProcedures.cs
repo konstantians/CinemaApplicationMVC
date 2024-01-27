@@ -8,10 +8,14 @@ public class AuthorizationProcedures : IAuthorizationProcedures
 {
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly UserManager<AppUser> _userManager;
-    public AuthorizationProcedures(RoleManager<IdentityRole> identityUserRole, UserManager<AppUser> userManager)
+    private readonly AppIdentityDbContext _appIdentityDbContext;
+
+    public AuthorizationProcedures(RoleManager<IdentityRole> identityUserRole, UserManager<AppUser> userManager,
+        AppIdentityDbContext appIdentityDbContext)
     {
         _roleManager = identityUserRole;
         _userManager = userManager;
+        _appIdentityDbContext = appIdentityDbContext;
     }
 
     public async Task<IEnumerable<IdentityRole>> GetRolesAsync(string roleId)
@@ -83,7 +87,7 @@ public class AuthorizationProcedures : IAuthorizationProcedures
             await _roleManager.CreateAsync(new IdentityRole(roleName));
         }
         //exception for duplicate admin role
-        catch (DbUpdateException ex)
+        catch (DbUpdateException)
         {
             Console.WriteLine($"Role with name '{roleName}' already exists.");
             throw;
@@ -168,16 +172,61 @@ public class AuthorizationProcedures : IAuthorizationProcedures
         }
     }
 
-    public async Task RemoveRoleFromUserAsync(string userId, string roleId)
+    public async Task<bool> UpdateRoleOfUserAsync(string userId, string oldRoleId, string newRoleId)
+    {
+        var executionStrategy = _appIdentityDbContext.Database.CreateExecutionStrategy();
+
+        await executionStrategy.ExecuteAsync(async () =>
+        {
+            using (var transaction = await _appIdentityDbContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+
+                    (var wasFound, var foundUser, var foundOldRole, var foundNewRole) = (await DoesTheInformationExist(userId, oldRoleId, newRoleId));
+                    if (!wasFound)
+                        return false;
+
+                    var result = await _userManager.RemoveFromRoleAsync(foundUser, foundOldRole.Name);
+                    if (!result.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return false;
+                    }
+
+                    result = await _userManager.AddToRoleAsync(foundUser, foundNewRole.Name);
+                    if (!result.Succeeded)
+                    {
+                        await transaction.RollbackAsync();
+                        return false;
+                    }
+
+                    await transaction.CommitAsync();
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+        });
+
+        return false; // This line is reached only if ExecuteAsync throws an exception
+    }
+
+
+    public async Task<bool> RemoveRoleFromUserAsync(string userId, string roleId)
     {
         try
         {
             (var wasFound, var foundUser, var foundRole) = (await DoesTheInformationExist(userId, roleId));
             if (!wasFound)
-                return;
+                return false;
 
-            await _userManager.RemoveFromRoleAsync(foundUser, foundRole.Name);
-
+            var result = await _userManager.RemoveFromRoleAsync(foundUser, foundRole.Name);
+            return result.Succeeded;
         }
         catch (Exception ex)
         {
@@ -205,6 +254,33 @@ public class AuthorizationProcedures : IAuthorizationProcedures
         return (true, foundUser, foundRole);
     }
 
-    
+    private async Task<(bool wasFound, AppUser appUser, IdentityRole oldIdentityRole, IdentityRole newIdentityRole)> DoesTheInformationExist(
+        string userId, string oldRoleId, string newRoleId)
+    {
+        var foundUser = await _userManager.FindByIdAsync(userId);
+        if (foundUser is null)
+        {
+            Console.WriteLine($"user with {userId} was not found");
+            return (false, null, null, null);
+        }
+
+        var foundOldRole = await _roleManager.FindByIdAsync(oldRoleId);
+        if (foundOldRole is null)
+        {
+            Console.WriteLine($"the old role with {oldRoleId} was not found");
+            return (false, null, null, null);
+        }
+
+        var foundNewRole = await _roleManager.FindByIdAsync(newRoleId);
+        if (foundNewRole is null)
+        {
+            Console.WriteLine($"the old role with {newRoleId} was not found");
+            return (false, null, null, null);
+        }
+
+        return (true, foundUser, foundOldRole, foundNewRole);
+    }
+
+
 }
 

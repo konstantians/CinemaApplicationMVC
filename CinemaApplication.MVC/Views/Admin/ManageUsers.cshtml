@@ -1,5 +1,401 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model List<AppUserWithRole>
+
 @{
+    ViewData["Title"] = "Manage Users";
+}
+
+<style>
+    .btn-sm-smaller {
+        padding: 0.1rem 0.4rem;
+        font-size: 0.65rem;
+    }
+</style>
+
+<div class="row">
+    @if ((bool)ViewData["UserDeletionSuccess"] || (bool)ViewData["UserCreationSuccess"] || (bool) ViewData["UserCreationSuccessEmailSuccess"])
+    {
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+            </symbol>
+        </svg>
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert">
+                    <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:">
+                        <use xlink:href="#check-circle-fill"/>
+                    </svg>
+                    @if ((bool)ViewData["UserDeletionSuccess"])
+                    {
+                        <div>The user was successfully deleted and an email has been successfully sent to notify them of their account deletion!</div>
+                    }
+                    else if ((bool)ViewData["UserCreationSuccess"])
+                    {
+                        <div>The user was successfully created!</div>
+                    }
+                    else if ((bool)ViewData["UserCreationSuccessEmailSuccess"])
+                    {
+                        <div>The user was successfully created and an email has been successfully sent to notify them of their account creation!</div>
+                    }
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+    }
+    else if ((bool)ViewData["UserDeletionFailure"] || (bool)ViewData["UserDeletionSuccessEmailFailure"] || (bool)ViewData["UserCreationSuccessEmailFailure"])
+    {
+        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+            </symbol>
+        </svg>
+        <div class="row">
+            <div class="offset-2 col-8">
+                @if ((bool)ViewData["UserDeletionFailure"])
+                {
+                    <div class="alert alert-danger d-flex align-items-center alert-dismissible fade show" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:">
+                            <use xlink:href="#exclamation-triangle-fill" />
+                        </svg>
+
+                        <div>Unfortunately the user was not able to be deleted. Please try again or contact us through our email kinnaskonstantinos0@gmail.com.</div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                else if ((bool)ViewData["UserDeletionSuccessEmailFailure"] || (bool)ViewData["UserCreationSuccessEmailFailure"])
+                {
+                    <div class="alert alert-warning d-flex align-items-center alert-dismissible fade show" role="alert">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:">
+                            <use xlink:href="#exclamation-triangle-fill" />
+                        </svg>
+                        @if ((bool)ViewData["UserDeletionSuccessEmailFailure"])
+                        {
+                            <div>The user was deleted successfully, but an email could not be sent to their account. Please contact them manually to notify them.</div>
+                        }
+                        else if ((bool)ViewData["UserCreationSuccessEmailFailure"])
+                        {
+                            <div>The user was created successfully, but an email could not be sent to their account. Please contact them manually to notify them.</div>
+                        }
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+
+<div class="d-flex justify-content-between mb-3">
+    <div></div>
+    <h2 class="h2 ms-5">Available Users</h2>
+    <div class="mt-2">
+        <a class="btn btn-outline-primary" asp-controller="Admin" asp-action="CreateUser">
+            Create User <i class="fa-solid fa-plus"></i>
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-3 d-block">
+        <div class="row position-fixed ps-3">
+            <div class="col">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h4 class="text-center">Available Filters</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <label id="searchLabel" for="searchInput" class="mb-1">Search By Username:</label>
+                            <div class="btn-group btn-group-sm dropdown" role="group"
+                                    aria-label="Button group example">
+                                <button type="button" class="btn btn-sm-smaller btn-primary">
+                                    <i id="searchButtonIconIndicator" class="fa-solid fa-user"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm-smaller btn-dark dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-start">
+                                    <a class="dropdown-item" href="#" data-label-text="Search By Username:"
+                                        data-icon="fa-user">Username Search<i class="fa-solid fa-user ms-2"></i></a>
+                                    <a class="dropdown-item" href="#" data-label-text="Search By Email:"
+                                        data-icon="fa-envelope">Email Search<i class="fa-solid fa-envelope ms-2"></i></a>
+                                    <a class="dropdown-item" href="#" data-label-text="Search By Phone:"
+                                        data-icon="fa-phone">Phone Search<i class="fa-solid fa-phone ms-2"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group input-group-sm mb-4 mt-3">
+                            <input type="text" name="searchInput" class="form-control" oninput="activateSearch()"
+                                    id="searchInput" value="">
+                            <a class="btn btn-outline-primary" id="searchButton"
+                                data-label-text="Search By Username:" onclick="activateSearch()">
+                                <i class="fas fa-search"></i>
+                            </a>
+                        </div>
+                        <hr>
+                        <label>Sort By:</label><br>
+                        <div class="form-check">
+                            <input class="form-check-input" onchange="sortCardsBy('username')"
+                                    type="radio" name="OrderRadioButton" id="orderRadioDefault" checked>
+                            <label class="form-check-label" for="orderRadioDefault">
+                                Username (Default)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" onchange="sortCardsBy('accountType')"
+                                    type="radio" name="OrderRadioButton" id="orderRadioAccountType">
+                            <label class="form-check-label" for="orderRadioAccountType">
+                                Account Type
+                            </label>
+                        </div>
+                        <div class="form-check" onchange="sortCardsBy('email')">
+                            <input class="form-check-input" type="radio" name="OrderRadioButton"
+                                    id="orderRadioEmail">
+                            <label class="form-check-label" for="orderRadioEmail">
+                                Email - Alphabetically
+                            </label>
+                        </div>
+                        <hr>
+                        <label>Allowed Account Types:</label><br>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="userSwitch"
+                                    onchange="applyAdditionalFilters()" checked>
+                            <label class="form-check-label" for="userSwitch">User</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="contentAdminSwitch"
+                                    onchange="applyAdditionalFilters()" checked>
+                            <label class="form-check-label" for="contentAdminSwitch">Content Admin</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="adminSwitch"
+                                    onchange="applyAdditionalFilters()" checked>
+                            <label class="form-check-label" for="adminSwitch">Admin</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="notActivatedAccountSwitch"
+                                   onchange="applyAdditionalFilters()" checked>
+                            <label class="form-check-label" for="notActivatedAccountSwitch">Not Activated Accounts</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="suspendedAccountSwitch"
+                                   onchange="applyAdditionalFilters()" checked>
+                            <label class="form-check-label" for="suspendedAccountSwitch">Suspended Accounts</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-9 ms-auto">
+        <div class="row" id="cardContainer">
+            @foreach (AppUserWithRole user in Model)
+            {
+                bool isAccountSuspended = @user.AppUser.LockoutEnd != null ? true : false;
+                            
+                <div class="col-4" data-card-usernameValue="@user.AppUser.UserName"
+                     data-card-emailValue="@user.AppUser.Email"
+                     data-card-phoneValue="@user.AppUser.PhoneNumber"
+                     data-card-accountType="@user.AppUserRole"
+                     data-card-hiddenBySearch="false"
+                     data-card-hiddenByOtherFilters="false"
+                     data-card-isAccountActivated="@user.AppUser.EmailConfirmed"
+                     data-card-isAccountSuspended="@isAccountSuspended">
+                    <div class="card mb-4 shadow">
+                        <div class="card-header">
+                            <h4 class="text-center">
+                                @user.AppUser.UserName
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            
+                            <p>
+                                Email: @user.AppUser.Email<br>
+                                Phone: @user.AppUser.PhoneNumber<br>
+                                Account Type: @user.AppUserRole<br>
+                                Account Activated : @user.AppUser.EmailConfirmed<br>
+                                Account Suspended : @isAccountSuspended
+                            </p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="text-center">
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                        data-bs-target="#deleteModal-@user.AppUser.Id"
+                                        style="width: 75px;">
+                                    Delete
+                                </button>
+                                <!-- Modal -->
+                                <div class="modal fade" id="deleteModal-@user.AppUser.Id"
+                                     tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title"
+                                                    id="deleteModalTitle-@user.AppUser.Id">
+                                                    Confirm User Deletion Dialog
+                                                </h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                        aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body" style="text-align: left;">
+                                                Are you certain that you want to delete the user?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">
+                                                    Close
+                                                </button>
+                                                <form method="post" asp-controller="Admin" asp-action="DeleteUser">
+                                                    <input type="hidden" name="userId" value=@user.AppUser.Id>
+                                                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a asp-controller="Admin" asp-action="EditUser" asp-route-userId="@user.AppUser.Id" class="btn btn-primary ms-2"
+                                   style="width: 75px;">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Select all <div> elements with the specified custom attributes
+        let allCards = document.querySelectorAll('div[data-card-usernameValue][data-card-emailValue][data-card-phoneValue]');
+
+        // Get the dropdown items
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+
+        // Add click event listeners to each dropdown item
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                // Get the data-icons attributes value
+                const iconClass = this.getAttribute('data-icon');
+                const searchLabelText = this.getAttribute('data-label-text');
+
+                // Find the icon of the button and the search label
+                const buttonIcon = document.getElementById("searchButtonIconIndicator");
+                const searchLabel = document.getElementById("searchLabel");
+
+                //update their values
+                buttonIcon.className = 'fa-solid ' + iconClass;
+                searchLabel.innerText = searchLabelText;
+                //used to update search
+                document.getElementById("searchButton").setAttribute('data-label-text', searchLabelText);
+            });
+        });
+
+        function activateSearch() {
+            // Loop through the selected elements
+            allCards.forEach(function (element) {
+                // Access the custom attribute values
+                let usernameValue = element.getAttribute('data-card-usernameValue').trim();
+                let emailValue = element.getAttribute('data-card-emailValue').trim();
+                let phoneValue = element.getAttribute('data-card-phoneValue').trim();
+                let searchMode = document.getElementById("searchButton").getAttribute('data-label-text');
+                let searchValue = document.getElementById("searchInput").value;
+
+                if ((!usernameValue.includes(searchValue) && searchMode === "Search By Username:") ||
+                    (!emailValue.includes(searchValue) && searchMode === "Search By Email:") ||
+                    (!phoneValue.includes(searchValue) && searchMode === "Search By Phone:")
+                ) {
+                    element.style.display = 'none';
+                    element.setAttribute('data-card-hiddenBySearch', 'true');
+                } else if (element.getAttribute('data-card-hiddenByOtherFilters') === 'false') {
+                    element.style.display = 'block';
+                    element.setAttribute('data-card-hiddenBySearch', 'false');
+                }
+                //just set that the search would have allowed it
+                else {
+                    element.setAttribute('data-card-hiddenBySearch', 'false');
+                }
+            });
+        }
+
+        function sortCardsBy(orderMode) {
+            // Extract the custom attribute values and associated elements into an array of objects
+            let cardData = [];
+            allCards.forEach(function (element) {
+                let usernameValue = element.getAttribute('data-card-usernameValue');
+                let emailValue = element.getAttribute('data-card-emailValue');
+                let phoneValue = element.getAttribute('data-card-phoneValue');
+                let accountTypeValue = element.getAttribute('data-card-accountType');
+
+                cardData.push({
+                    element: element,
+                    usernameValue: usernameValue,
+                    emailValue: emailValue,
+                    phoneValue: phoneValue,
+                    accountTypeValue: accountTypeValue
+                });
+            });
+
+            // Sort the array of objects based on the given mode
+            if (orderMode === "username") {
+                cardData.sort(function (a, b) {
+                    return a.usernameValue.localeCompare(b.usernameValue);
+                });
+            } else if (orderMode === "accountType") {
+                cardData.sort(function (a, b) {
+                    return a.accountTypeValue.localeCompare(b.accountTypeValue);
+                });
+            } else if (orderMode === "email") {
+                cardData.sort(function (a, b) {
+                    return a.emailValue.localeCompare(b.emailValue);
+                });
+            }
+
+            // Clear the current order of elements in the DOM
+            allCards.forEach(function (element) {
+                element.remove();
+            });
+
+            // Append the sorted elements back to the DOM in the new order
+            cardData.forEach(function (card) {
+                document.getElementById("cardContainer").appendChild(card.element); // Modify the target container as needed
+            });
+        }
+
+        function applyAdditionalFilters() {
+            let usersAllowed = document.getElementById('userSwitch');
+            let contentAdminsAllowed = document.getElementById('contentAdminSwitch');
+            let adminsAllowed = document.getElementById('adminSwitch');
+            let notActivatedAccountsAllowed = document.getElementById('notActivatedAccountSwitch');
+            let suspendedAccountsAllowed = document.getElementById('suspendedAccountSwitch');
+
+            // Loop through the selected elements
+            allCards.forEach(function (element) {
+                // Access the custom attribute values
+                let accountTypeValue = element.getAttribute('data-card-accountType');
+                let activatedAccount = element.getAttribute('data-card-isAccountActivated');
+                let suspendedAccount = element.getAttribute('data-card-isAccountSuspended');
+
+                if ((accountTypeValue === 'User' && !usersAllowed.checked) ||
+                    (accountTypeValue === 'Content Admin' && !contentAdminsAllowed.checked) ||
+                    (accountTypeValue === 'Admin' && !adminsAllowed.checked) ||
+                    (activatedAccount === 'False' && !notActivatedAccountsAllowed.checked) ||
+                    (suspendedAccount === 'True' && !suspendedAccountsAllowed.checked)) {
+                    element.style.display = 'none';
+                    element.setAttribute('data-card-hiddenByOtherFilters', 'true');
+                } else if (element.getAttribute('data-card-hiddenBySearch') === 'false') {
+                    element.style.display = 'block';
+                    element.setAttribute('data-card-hiddenByOtherFilters', 'false');
+                }
+                //just set that the other filters would have allowed it
+                else {
+                    element.setAttribute('data-card-hiddenByOtherFilters', 'false');
+                }
+            });
+        }
+    </script>
 }

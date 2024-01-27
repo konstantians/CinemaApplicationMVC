@@ -3,13 +3,6 @@
 @{
     ViewData["Title"] = "Edit Account";
 }
-@* 
-3 sections
-first username, phone, account type
-second password, email(both propably require a modal)
-third tickets, bankcard *@
-
-
 
 @if ((bool)ViewData["DuplicateUsernameError"] || (bool)ViewData["DuplicateEmailError"] ||
    (bool)ViewData["BasicInformationChangeError"] || (bool)ViewData["PasswordChangeError"])
@@ -90,7 +83,7 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                     <label asp-for="@Model.AccountBasicSettingsViewModel.Username"><i class="fa-solid fa-user me-2"></i>Account Username</label>
                     <div class="input-group">
                         <input type="text" class="form-control" id="username" asp-for="@Model.AccountBasicSettingsViewModel.Username"
-                               value="@Model.AccountBasicSettingsViewModel.Username" disabled>
+                               value="@Model.AccountBasicSettingsViewModel.Username" readOnly>
                         <a class="btn btn-outline-primary" id="usernameButton" onclick="toggleInputField('username', 'usernameButton')">
                             <i class="fa-solid fa-pencil"></i>
                         </a>
@@ -101,7 +94,7 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                     <label asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"><i class="fa-solid fa-phone me-2"></i>Account Phone Number</label>
                     <div class="input-group">
                         <input type="tel" class="form-control" id="phone" asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"
-                               value="@Model.AccountBasicSettingsViewModel.PhoneNumber" disabled>
+                               value="@Model.AccountBasicSettingsViewModel.PhoneNumber" readOnly>
                         <a class="btn btn-outline-primary" id="phoneNumberButton"
                            onclick="toggleInputField('phone', 'phoneNumberButton')">
                             <i class="fa-solid fa-pencil"></i>
@@ -111,11 +104,11 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                 </div>
                 <div class="col-12 mb-4 mt-1">
                     <label asp-for="@Model.AccountBasicSettingsViewModel.AccountType"><i class="form-label"></i>Account Type</label>
-                    <input type="tel" class="form-control" id="accountType" asp-for="@Model.AccountBasicSettingsViewModel.AccountType"
-                           value="@Model.AccountBasicSettingsViewModel.AccountType" disabled>
+                    <input type="text" class="form-control" id="accountType" asp-for="@Model.AccountBasicSettingsViewModel.AccountType"
+                           value="@Model.AccountBasicSettingsViewModel.AccountType" readOnly>
                 </div>
                 <div class="d-flex justify-content-center mt-5">
-                    <button type="submit" onclick="enableAll()" class="btn btn-primary">Confirm Changes</button>
+                    <button type="submit" class="btn btn-primary">Confirm Changes</button>
                 </div>
             </div>
         </form>
@@ -126,7 +119,7 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                     <label asp-for="@Model.ChangePasswordModel.OldPassword"><i class="fa-solid fa-lock me-2"></i>Account Password</label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="password" asp-for="@Model.ChangePasswordModel.OldPassword"
-                               value="@Model.ChangePasswordModel.OldPassword" disabled>
+                               value="@Model.ChangePasswordModel.OldPassword" readOnly>
                         <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                             <i class="fa-solid fa-pencil"></i>
                         </a>
@@ -136,8 +129,8 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                 <div class="col-12 mb-4 mt-1">
                     <label asp-for="@Model.ChangeEmailModel.OldEmail"><i class="fa-solid fa-envelope me-2"></i>Account Email</label>
                     <div class="input-group">
-                        <input type="email" class="form-control" id="email" asp-for="@Model.ChangeEmailModel.OldEmail" 
-                        value="@Model.ChangeEmailModel.OldEmail" disabled>
+                        <input type="email" class="form-control" id="email" asp-for="@Model.ChangeEmailModel.OldEmail"
+                               value="@Model.ChangeEmailModel.OldEmail" readOnly>
                         <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">
                             <i class="fa-solid fa-pencil"></i>
                         </a>
@@ -285,7 +278,7 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                         <div class="row">
                             <div class="col-12 mb-3">
                                 <label asp-for="ChangeEmailModel.OldEmail" class="form-label">Old Email</label>
-                                <input asp-for="ChangeEmailModel.OldEmail" type="text" class="form-control" disabled>
+                                <input asp-for="ChangeEmailModel.OldEmail" type="text" class="form-control" readOnly>
                             </div>
                             <div class=" col-12 mb-3">
                                 <label asp-for="ChangeEmailModel.NewEmail" class="form-label">New Email</label>
@@ -367,21 +360,14 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
             let button = document.getElementById(buttonId);
 
             if (inputField && button) {
-                if (inputField.disabled) {
-                    inputField.disabled = false;
+                if (inputField.readOnly) {
+                    inputField.readOnly = false;
                     button.innerHTML = '<i class="fa-solid fa-check"></i>';
                 } else {
-                    inputField.disabled = true;
+                    inputField.readOnly = true;
                     button.innerHTML = '<i class="fa-solid fa-pencil"></i>';
                 }
             }
-        }
-
-        //enable all the fields, if that does not happen then the values will not be sent to the servlet
-        function enableAll() {
-            document.getElementById("username").disabled = false;
-            document.getElementById("phone").disabled = false;
-            document.getElementById("accountType").disabled = false;
         }
     </script>
 }

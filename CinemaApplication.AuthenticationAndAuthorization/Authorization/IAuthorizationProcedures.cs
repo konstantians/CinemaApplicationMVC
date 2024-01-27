@@ -13,7 +13,8 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Authorization
         Task<string> GetUserRoleAsync(string userId);
         Task<IEnumerable<IdentityRole>> GetRolesAsync(string roleId);
         Task<IEnumerable<AppUser>> GetUsersOfRoleAsync(string roleId);
-        Task RemoveRoleFromUserAsync(string userId, string roleId);
+        Task<bool> RemoveRoleFromUserAsync(string userId, string roleId);
         Task UpdateRoleAsync(string roleId, string roleName);
+        Task<bool> UpdateRoleOfUserAsync(string userId, string oldRoleId, string newRoleId);
     }
 }

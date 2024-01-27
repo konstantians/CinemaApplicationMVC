@@ -23,24 +23,116 @@ public class AuthenticationProcedures : IAuthenticationProcedures
 
     }
 
+    public async Task<List<AppUser>> GetUsersAsync()
+    {
+        try
+        {
+            return await _userManager.Users.ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
     public async Task<AppUser> GetCurrentUserAsync()
     {
-        return await _userManager.GetUserAsync(_signInManager.Context.User);
+        try
+        {
+            return await _userManager.GetUserAsync(_signInManager.Context.User);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
     }
 
     public async Task<AppUser> FindByUserIdAsync(string userId)
     {
-        return await _userManager.FindByIdAsync(userId);
+        try
+        {
+            return await _userManager.FindByIdAsync(userId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
     }
 
     public async Task<AppUser> FindByUsernameAsync(string username)
     {
-        return await _userManager.FindByNameAsync(username);
+        try
+        {
+            return await _userManager.FindByNameAsync(username);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
     }
 
     public async Task<AppUser> FindByEmailAsync(string email)
     {
-        return await _userManager.FindByEmailAsync(email);
+        try
+        {
+            return await _userManager.FindByEmailAsync(email);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<bool> RegisterUserAndConfirmEmailAsync(AppUser appUser, string password,
+    bool isPersistent, string roleName)
+    {
+        var executionStrategy = _appIdentityDbContext.Database.CreateExecutionStrategy();
+        bool userCreationSucceeded = true;
+        await executionStrategy.ExecuteAsync(async () =>
+        {
+            using (var transaction = await _appIdentityDbContext.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    var result = await _userManager.CreateAsync(appUser, password);
+
+                    // If user creation fails, rollback the transaction
+                    if (!result.Succeeded)
+                    {
+                        userCreationSucceeded = false;
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+
+                    IdentityRole role = await _authorizationProcedures.GetRoleByNameAsync(roleName);
+                    bool roleResult = await _authorizationProcedures.AddRoleToUserAsync(appUser.Id, role.Id);
+
+                    // If adding role fails, rollback the transaction
+                    if (!roleResult)
+                    {
+                        userCreationSucceeded = false;
+                        await transaction.RollbackAsync();
+                        return;
+                    }
+
+                    // If everything is successful, commit the transaction
+                    await transaction.CommitAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                    // If an exception occurs, rollback the transaction
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            }
+        });
+        return userCreationSucceeded;
     }
 
     public async Task<(string, string)> RegisterUserAsync(AppUser appUser, string password, 
@@ -91,6 +183,21 @@ public class AuthenticationProcedures : IAuthenticationProcedures
             return (appUser.Id, confirmationToken);
         else
             throw new InvalidOperationException("User registration failed.");
+    }
+
+    public async Task<bool> ChangePasswordWithoutConfirmationAsync(AppUser appUser, string newPassword)
+    {
+        try
+        {
+            string token = await _userManager.GeneratePasswordResetTokenAsync(appUser);
+            var result = await _userManager.ResetPasswordAsync(appUser, token, newPassword);
+            return result.Succeeded;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
     }
 
     public async Task<string> CreateResetPasswordTokenAsync(AppUser appUser)
@@ -151,11 +258,6 @@ public class AuthenticationProcedures : IAuthenticationProcedures
     {
         return await Task.Run(() => _signInManager.IsSignedIn(_signInManager.Context.User));
     }
-
-    /*public bool CheckIfAccountEmailIsActivated()
-    {
-        return _userManager.(_signInManager.Context.User);
-    }*/
 
     public async Task<bool> UpdateUserAccountAsync(AppUser appUser)
     {
@@ -225,6 +327,33 @@ public class AuthenticationProcedures : IAuthenticationProcedures
         }
     }
 
+    public async Task<bool> EnableOrDisableEmailWithoutConfirmationAsync(string userId, bool shouldActivate)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+            {
+                return false;
+            }
+
+            user.EmailConfirmed = shouldActivate;
+            var result = await _userManager.UpdateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
     public async Task<bool> ResetPasswordAsync(string userId, string resetPasswordToken, string newPassword)
     {
         try
@@ -270,6 +399,33 @@ public class AuthenticationProcedures : IAuthenticationProcedures
             }
 
             await _signInManager.SignInAsync(user, false);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task<bool> ChangeEmailWithoutConfirmationAsync(string userId, string newEmail)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+            {
+                return false;
+            }
+
+            string changeEmailToken = await _userManager.GenerateChangeEmailTokenAsync(user, newEmail);
+            var result = await _userManager.ChangeEmailAsync(user, newEmail, changeEmailToken);
+
+            if (!result.Succeeded)
+            {
+                return false;
+            }
+
             return true;
         }
         catch (Exception ex)
