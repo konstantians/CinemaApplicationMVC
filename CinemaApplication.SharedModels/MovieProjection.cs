@@ -4,8 +4,6 @@ namespace CinemaApplication.SharedModels;
 public class MovieProjection
 {
     public int Id { get; set; }
-    
-    [Required]
     public int SeatsLeft { get; set; }
     
     [Required]

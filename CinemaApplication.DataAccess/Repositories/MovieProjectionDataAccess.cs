@@ -13,7 +13,7 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
         _context = context;
         _reservationDataAccess = reservationDataAccess;
     }
-
+    
     public async Task<IEnumerable<MovieProjection>> GetMovieProjectionsAsync()
     {
         try
@@ -49,11 +49,11 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
         }
     }
 
-    public async Task<int> CreateMovieProjectionAsync(MovieProjection movie)
+    public async Task<int> CreateMovieProjectionAsync(MovieProjection projection)
     {
         try
         {
-            var result = await _context.MovieProjections.AddAsync(movie);
+            var result = await _context.MovieProjections.AddAsync(projection);
             await _context.SaveChangesAsync();
 
             return result.Entity.Id;
@@ -61,7 +61,25 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            throw;
+            return -1;
+        }
+    }
+
+    public async Task<bool> CreateMovieProjectionsAsync(List<MovieProjection> projections)
+    {
+        try
+        {
+            await _context.MovieProjections.AddRangeAsync(projections);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            _context.MovieProjections.RemoveRange(projections);
+            return false;
         }
     }
 
@@ -85,7 +103,7 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
         }
     }
 
-    public async Task DeleteMovieProjectionAsync(int id)
+    public async Task<bool> DeleteMovieProjectionAsync(int id)
     {
         try
         {
@@ -96,11 +114,12 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
             }
             _context.MovieProjections.Remove(foundMovieProjection);
             await _context.SaveChangesAsync();
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            throw;
+            return false;
         }
     }
 }

@@ -1,0 +1,207 @@
+﻿@model CreateMovieViewModel
+
+<style>
+    .error-message {
+      color: red;
+      font-size: 14px;
+    }
+
+    /* .error-container {
+      display: flex;
+      flex-direction: column;
+    }
+    .error-container a {
+      margin-top: 4px;
+    } */
+</style>
+
+
+@if ((bool)ViewData["MovieCreationFailure"]! || (bool)ViewData["DuplicateMovieTitleError"]!)
+{
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </symbol>
+    </svg>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger d-flex align-items-center alert-dismissible fade show" role="alert">
+                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                @if ((bool)ViewData["DuplicateMovieTitleError"]!)
+                {
+                    <div>There is another film with the given title.</div>
+                }
+                else if ((bool)ViewData["MovieCreationFailure"]!)
+                {
+                    <div>Unfortunately something went wrong while creating the film. Please try again or contact us through our email kinnaskonstantinos0@gmail.com</div>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="shadow col-12 p-3" style="background-color:white;">
+    <h2 class="text-center mb-4">Create New Film Form</h2>
+    <form method="post" asp-controller="ContentAdmin" asp-action="CreateMovie">
+        <div class="row">
+            <div class="col-4">
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Title" class="form-label">Enter Title</label>
+                    <input type="text" asp-for="@Model.Movie.Title" class="form-control" placeholder="Enter title">
+                    <span asp-validation-for="@Model.Movie.Title" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Director" class="form-label">Enter Director's Name</label>
+                    <input type="text" asp-for="@Model.Movie.Director" class="form-control" placeholder="Enter director's name">
+                    <span asp-validation-for="@Model.Movie.Director" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Category" class="form-label">Enter Film Category</label>
+                    <input type="text" asp-for="@Model.Movie.Category"  class="form-control" placeholder="Enter film category">
+                    <span asp-validation-for="@Model.Movie.Category" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-2">
+                    <label asp-for="@Model.Movie.ReleaseDate" class="form-label">Enter Film's Release Date</label>
+                    <input type="date" asp-for="@Model.Movie.ReleaseDate" class="form-control">
+                    <span asp-validation-for="@Model.Movie.ReleaseDate" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Description" class="form-label">Create Description</label>
+                    <textarea asp-for="@Model.Movie.Description" rows="4" class="form-control"
+                        placeholder="Create a description for the film(less than 1000 characters)"></textarea>
+                    <span asp-validation-for="@Model.Movie.Description" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="@Model.Movie.FilmDuration" class="form-label">Enter Film's Duration(minutes)</label>
+                    <input type="number" asp-for="@Model.Movie.FilmDuration" class="form-control" placeholder="Enter film's duration in minutes">
+                    <span asp-validation-for="@Model.Movie.FilmDuration" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Rating" class="form-label">Enter Film's Rating</label>
+                    <input type="number" asp-for="@Model.Movie.Rating" class="form-control" placeholder="Enter film's rating(0-5)">
+                    <span asp-validation-for="@Model.Movie.Rating" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-1">
+                    <div class=""></div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" asp-for="@Model.Movie.IsAgeRestricted" value="true">
+                        <label class="form-check-label" asp-for="@Model.Movie.IsAgeRestricted">
+                            Age Restricted
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div id="projectionsSection" class="mb-3">
+                    <div class="mb-1 mt-1">
+                        <label for="projectionDate" class="form-label">Projection Date</label>
+                        <input type="date" name="projectionDate" class="form-control"
+                               id="projectionDate">
+                        <span id="projectionDateError" class="error-message"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4 mt-1">
+                        <div class="">
+                            <label for="startingTime" class="form-label">From:</label>
+                            <input type="time" name="startingTime" class="form-control form-control-sm" id="startingTime">
+                            <span id="startingTimeError" class="error-message"></span>  
+                        </div>
+                        <div class="mx-1">
+                            <label for="endingTime" class="form-label">To:</label>
+                            <input type="time" name="endingTime" class="form-control form-control-sm" id="endingTime">
+                        </div>
+                        <div class="">
+                            <label for="roomId" class="form-label">Room</label>
+                            <select name="roomId" class="form-select form-select-sm w-100" id="roomId">
+                                @foreach (CinemaRoom cinemaRoom in Model.CinemaRooms)
+                                {
+                                    <option value="@cinemaRoom.Id" data-cinema-Room-available-seats="@cinemaRoom.AvailableSeats">
+                                        @cinemaRoom.Name
+                                    </option>
+                                }                                
+                            </select>
+                        </div>
+                        
+                        <div class="mt-4 ms-2">
+                            <a class="btn btn-primary" id="addProjectionButton"><i class="fa-solid fa-plus"></i></a>
+                        </div>
+                    </div>
+                    <div class="projections-list">
+                        <h5 class="mb-3">Projections</h5>
+                        <ul class="list-group" id="projectionList"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-center mt-4 ms-3">
+            <button type="submit" class="btn btn-primary" style="width: 20%;">Create Film</button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        //projection listBox functionality
+        $(document).ready(function () {
+            $('#addProjectionButton').click(function () {
+                let startingTime = $('#startingTime').val();
+                let endingTime = $('#endingTime').val();
+                let projectionDate = $('#projectionDate').val();
+                let error = false;
+
+                // Check if the projection's date is empty
+                if (projectionDate === '') {
+                    $('#projectionDateError').text("The date must not be empty");
+                    error = true;
+                }
+                else {
+                    $('#projectionDateError').text('');
+                }
+
+                // Check if the ending hour is greater than the starting hour
+                let startingDateTime = new Date(`2000-01-01T${startingTime}`);
+                let endingDateTime = new Date(`2000-01-01T${endingTime}`);
+
+                // Check if the projection's hours are empty
+                if (startingTime === '' || endingTime === '') {
+                    $('#startingTimeError').text("The hours must not be empty");
+                    error = true;
+                }
+                else if(endingDateTime <= startingDateTime) {
+                    $('#startingTimeError').text("Ending time must be greater than starting time");
+                    error = true;
+                }
+
+                if (error)
+                    return;
+
+                // Clear the error message
+                $('#startingTimeError').text('');
+                
+
+                // Get the selected option value and custom attribute
+                let selectedOption = $('#roomId option:selected');
+                let availableSeats = selectedOption.data('cinema-room-available-seats');
+                let roomId = selectedOption.val();
+
+                // Add a new entry to the projection list
+                let entry = '<li class="list-group-item" style="font-size: 14px;">' +
+                    'Date: ' + projectionDate + ' | From: ' + startingTime + ' | To: ' + endingTime + ' | Room: ' + roomId +
+                    '<input type="hidden" name="projection_' + projectionDate + '_' + startingTime + '_' + endingTime + '_' + roomId + '_' + availableSeats + '">' +
+                    '<a class="btn btn-danger btn-sm deleteProjectionButton ms-3" style="float:right;"><i class="fa-regular fa-x"></i></a></li>';
+
+                $('#projectionList').append(entry);
+
+                // Add the click event listener to the delete button
+                $('.deleteProjectionButton').click(function () {
+                    $(this).parent().remove();
+                });
+            });
+        });
+    </script>
+}

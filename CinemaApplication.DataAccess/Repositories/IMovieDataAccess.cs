@@ -5,8 +5,9 @@ namespace CinemaApplication.DataAccess.Repositories;
 public interface IMovieDataAccess
 {
     Task<int> CreateMovieAsync(Movie movie);
-    Task DeleteMovieAsync(int id);
+    Task<bool> DeleteMovieAsync(int id);
     Task<Movie> GetMovieAsync(int id);
+    Task<Movie> GetMovieByTitleAsync(string title);
     Task<IEnumerable<Movie>> GetMoviesAsync();
-    Task UpdateMovieAsync(int id, Movie movie);
+    Task<bool> UpdateMovieAsync(int id, Movie movie);
 }

@@ -29,10 +29,10 @@
                             string userId = result is null ? "" : result.Id;
                         }
                         @if (await _authenticationProcedures.CheckIfUserIsLoggedIn()
-                        && (await _authorizationProcedures.GetUserRoleAsync(userId)) == "Content Admin")
+                        && (await _authorizationProcedures.GetUserRoleAsync(userId)) == "ContentAdmin")
                         {
                         <li class="nav-item me-1">
-                            <a class="nav-link" asp-controller="ContentAdmin" asp-action="ManageFilms">Manage Films</a>
+                            <a class="nav-link" asp-controller="ContentAdmin" asp-action="ManageMovies">Manage Films</a>
                         </li>
                         }
                         else if (await _authenticationProcedures.CheckIfUserIsLoggedIn() 
@@ -42,7 +42,7 @@
                                 <a class="nav-link" asp-controller="Admin" asp-action="ManageUsers">Manage Users</a>
                             </li>
                         }
-                        
+
                         <li class="nav-item me-1">
                             <a class="nav-link" asp-controller="Home" asp-action="CinemaProgram">Cinema Program</a>
                         </li>

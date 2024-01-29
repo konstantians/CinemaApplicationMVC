@@ -144,23 +144,23 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
             <div class="row">
                 <h4 class="text-center">Basic Account Settings </h4>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.AccountBasicSettingsViewModel.Username"><i class="fa-solid fa-user me-2"></i>Account Username</label>
+                    <label class="form-label" asp-for="@Model.AccountBasicSettingsViewModel.Username"><i class="fa-solid fa-user me-2"></i>Account Username</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="username" asp-for="@Model.AccountBasicSettingsViewModel.Username"
+                        <input type="text" class="form-control" asp-for="@Model.AccountBasicSettingsViewModel.Username"
                                value="@Model.AccountBasicSettingsViewModel.Username" readOnly>
-                        <a class="btn btn-outline-primary" id="usernameButton" onclick="toggleInputField('username', 'usernameButton')">
+                        <a class="btn btn-outline-primary" id="usernameButton" onclick="toggleInputField('AccountBasicSettingsViewModel_Username', 'usernameButton' )">
                             <i class="fa-solid fa-pencil"></i>
                         </a>
                     </div>
                     <span asp-validation-for="@Model.AccountBasicSettingsViewModel.Username" class="text-danger"></span>
                 </div>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"><i class="fa-solid fa-phone me-2"></i>Account Phone Number</label>
+                    <label class="form-label" asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"><i class="fa-solid fa-phone me-2"></i>Account Phone Number</label>
                     <div class="input-group">
-                        <input type="tel" class="form-control" id="phone" asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"
+                        <input type="tel" class="form-control" asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"
                                value="@Model.AccountBasicSettingsViewModel.PhoneNumber" readOnly>
                         <a class="btn btn-outline-primary" id="phoneNumberButton"
-                           onclick="toggleInputField('phone', 'phoneNumberButton')">
+                           onclick="toggleInputField('AccountBasicSettingsViewModel_PhoneNumber', 'phoneNumberButton')">
                             <i class="fa-solid fa-pencil"></i>
                         </a>
                     </div>
@@ -196,7 +196,7 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
             <div class="row">
                 <h4 class="text-center">Sensitive Account Settings </h4>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.ChangePasswordModel.OldPassword"><i class="fa-solid fa-lock me-2"></i>Account Password</label>
+                    <label class="form-label" asp-for="@Model.ChangePasswordModel.OldPassword"><i class="fa-solid fa-lock me-2"></i>Account Password</label>
                     <div class="input-group">
                         <input type="password" class="form-control" id="password" asp-for="@Model.ChangePasswordModel.OldPassword"
                                value="@Model.ChangePasswordModel.OldPassword" readOnly>
@@ -207,7 +207,7 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
                     <span asp-validation-for="@Model.ChangePasswordModel.OldPassword" class="text-danger"></span>
                 </div>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.ChangeEmailModel.OldEmail"><i class="fa-solid fa-envelope me-2"></i>Account Email</label>
+                    <label class="form-label" asp-for="@Model.ChangeEmailModel.OldEmail"><i class="fa-solid fa-envelope me-2"></i>Account Email</label>
                     <div class="input-group">
                         <input type="email" class="form-control" asp-for="@Model.ChangeEmailModel.OldEmail"
                                value="@Model.ChangeEmailModel.OldEmail" readOnly>
@@ -218,7 +218,7 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
                     <span asp-validation-for="@Model.ChangeEmailModel.OldEmail" class="text-danger"></span>
                 </div>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.IsEmailConfirmed"><i class="fa-solid fa-envelope-circle-check me-2"></i>Email Confirmed</label>
+                    <label class="form-label" asp-for="@Model.IsEmailConfirmed"><i class="fa-solid fa-envelope-circle-check me-2"></i>Email Confirmed</label>
                     <div class="input-group">
                         <input type="email" class="form-control" id="newEmail" asp-for="@Model.IsEmailConfirmed"
                                value="@emailConfirmText" readOnly>
@@ -326,12 +326,12 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
                     <div class="container">
                         @* TODO maybe add a warning here *@
                         <div class="row">
-                            <div class=" col-12 mb-3">
+                            <div class="col-12 mb-3">
                                 <label asp-for="ChangePasswordModel.NewPassword" class="form-label">New Password</label>
                                 <input asp-for="ChangePasswordModel.NewPassword" class="form-control" type="password" />
                                 <span asp-validation-for="ChangePasswordModel.NewPassword" class="text-danger"></span>
                             </div>
-                            <div class=" col-12 mb-3">
+                            <div class="col-12 mb-3">
                                 <label asp-for="ChangePasswordModel.ConfirmNewPassword" class="form-label">Confirm New Password</label>
                                 <input asp-for="ChangePasswordModel.ConfirmNewPassword" class="form-control" type="password">
                                 <span asp-validation-for="ChangePasswordModel.ConfirmNewPassword" class="text-danger"></span>
@@ -492,7 +492,6 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
         function toggleInputField(inputId, buttonId) {
             let inputField = document.getElementById(inputId);
             let button = document.getElementById(buttonId);
-
             if (inputField && button) {
                 if (inputField.readOnly) {
                     inputField.readOnly = false;

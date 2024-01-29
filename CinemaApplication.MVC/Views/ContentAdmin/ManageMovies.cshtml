@@ -1,0 +1,371 @@
+﻿@model List<Movie>
+
+@{
+    ViewData["Title"] = "Manage Films";
+}
+
+@if ((bool)ViewData["MovieDeletionSuccess"]! || (bool)ViewData["MovieCreationSuccess"]!)
+{
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+        </symbol>
+    </svg>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert">
+                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                @if ((bool)ViewData["MovieCreationSuccess"]!)
+                {
+                    <div>The film was successfully created!</div>
+                }
+                else if((bool)ViewData["MovieDeletionSuccess"]!){
+                    <div>The film has successfully been deleted!</div>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+else if ((bool)ViewData["MovieDeletionFailure"]!)
+{    
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+        </symbol>
+    </svg>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger d-flex align-items-center alert-dismissible fade show" role="alert">
+                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:">
+                    <use xlink:href="#exclamation-triangle-fill" />
+                </svg>
+                @if ((bool)ViewData["MovieDeletionFailure"]!)
+                {
+                    <div>Unfortunately the film was not able to be deleted. Please try again or contact us through our email kinnaskonstantinos0@gmail.com.</div>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="d-flex justify-content-between mb-3">
+    <div></div>
+    <h2 class="h2 ms-5">Available Films</h2>
+    <div class="mt-2">
+        <a class="btn btn-outline-primary" asp-controller="ContentAdmin" asp-action="CreateMovie">Add Film <i class="fa-solid fa-plus"></i></a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-3 d-block">
+        <div class="row position-fixed ps-3">
+            <div class="col">
+                <div class="card shadow">
+                    <div class="card-header">
+                        <h4 class="text-center">Available Filters</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between">
+                            <label id="searchLabel" for="searchInput" class="mb-1">Search By Title:</label>
+                            <div class="btn-group btn-group-sm dropdown" role="group" aria-label="Button group example">
+                                <button type="button" class="btn btn-sm-smaller btn-primary">
+                                    <i id="searchButtonIconIndicator" class="fa-solid fa-film"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm-smaller btn-dark dropdown-toggle"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                </button>
+                                <div class="dropdown-menu dropdown-menu-end dropdown-menu-start">
+                                    <a class="dropdown-item" href="#" data-label-text="Search By Title:" data-icon="fa-film">Movie Title Search<i class="fa-solid fa-film ms-2"></i></a>
+                                    <a class="dropdown-item" href="#" data-label-text="Search By Director:" data-icon="fa-user">Director Search<i class="fa-solid fa-user ms-2"></i></a>
+                                    <a class="dropdown-item" href="#" data-label-text="Search By Date:" data-icon="fa-calendar-days">Date Search<i class="fa-solid fa-calendar-days ms-2"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="input-group input-group-sm mb-4 mt-1">
+                            <input type="text" name="searchInput" class="form-control" oninput="activateSearch()"
+                                    id="searchInput" value="">
+                            <a class="btn btn-outline-primary" id="searchButton" data-label-text="Search By Title:" onclick="activateSearch()">
+                                <i class="fas fa-search"></i>
+                            </a>
+                        </div>
+                        <hr>
+                        <label>Sort By:</label><br>
+                        <div class="form-check">
+                            <input class="form-check-input" onchange="sortCardsBy('movieTitle')"
+                                    type="radio" name="OrderRadioButton" id="orderRadioDefault" checked>
+                            <label class="form-check-label" for="orderRadioDefault">
+                                Default Order
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" onchange="sortCardsBy('category')"
+                                    type="radio" name="OrderRadioButton" id="orderRadioCategory">
+                            <label class="form-check-label" for="orderRadioCategory">
+                                Category
+                            </label>
+                        </div>
+                        <div class="form-check" onchange="sortCardsBy('releaseDate')">
+                            <input class="form-check-input" type="radio" name="OrderRadioButton" id="orderRadioReleaseDate">
+                            <label class="form-check-label" for="orderRadioReleaseDate">
+                                Release Date
+                            </label>
+                        </div>
+                        <div class="form-check" onchange="sortCardsBy('timeDuration')">
+                            <input class="form-check-input" type="radio" name="OrderRadioButton" id="orderRadioTimeDuration">
+                            <label class="form-check-label" for="orderRadioTimeDuration">
+                                Time Duration
+                            </label>
+                        </div>
+                        <div class="form-check" onchange="sortCardsBy('rating')">
+                            <input class="form-check-input" type="radio" name="OrderRadioButton" id="orderRadioRating">
+                            <label class="form-check-label" for="orderRadioRating">
+                                Rating
+                            </label>
+                        </div>
+                        <hr>
+                        <label>Additional Filters:</label><br>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="ageRestrictedSwitch"
+                                    onchange="applyAdditionalFilters()">
+                            <label class="form-check-label" for="ageRestrictedSwitch">Age Restricted</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="highlyRatedSwitch"
+                                    onchange="applyAdditionalFilters()">
+                            <label class="form-check-label" for="highlyRatedSwitch">Highly Rated(>3)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-9 ms-auto">
+        <div class="row" id="cardContainer">
+            @foreach(Movie movie in Model)
+            {
+                <div class="col-4" data-card-movieTitle="@movie.Title"
+                     data-card-director="@movie.Director"
+                     data-card-category="@movie.Category"
+                     data-card-date="@movie.ReleaseDate"
+                     data-card-rating="@movie.Rating"
+                     data-card-duration="@movie.FilmDuration"
+                     data-card-ageRestriction="@movie.IsAgeRestricted"
+                     data-card-hiddenBySearch="false"
+                     data-card-hiddenByOtherFilters="false">
+                    <div class="card mb-4 shadow">
+                        <div class="card-header">
+                            <h4 class="text-center">@movie.Title</h4>
+                        </div>
+                        <div class="card-body">
+                            <p>Director: @movie.Director</p>
+                            <p>Category: @movie.Category</p>
+                            @{
+                                int day = movie.ReleaseDate.Day;
+                                int month = movie.ReleaseDate.Month;
+                                int year = movie.ReleaseDate.Year;
+                                string releaseDate = String.Format("{0:D2}/{1:D2}/{2:D4}", month, day, year);
+                            }
+                            <p>Release Date: @releaseDate</p>
+                            <p>Rating: @movie.Rating</p>
+                            <p>Time Duration: @movie.FilmDuration</p>
+                            <p>Age Restriction: @movie.IsAgeRestricted</p>
+                        </div>
+                        <div class="card-footer">
+                            <div class="text-center">
+                                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal-@movie.Id" style="width: 75px;">
+                                    Delete
+                                </button>
+                                <!-- Modal -->
+                                <div class="modal fade" id="deleteModal-@movie.Id" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="deleteModalTitle-@movie.Id">Confirm Film Deletion Dialog</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body" style="text-align: left;">
+                                                Are you certain that you want to delete the film?
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                                                <form method="post" asp-controller="ContentAdmin" asp-action="DeleteMovie">
+                                                    <input name="movieId" value="@movie.Id" hidden/>
+                                                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a asp-controller="ContentAdmin" asp-action="EditMovie" asp-route-movieId="@movie.Id" 
+                                class="btn btn-primary ms-2" style="width: 75px;">Edit</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Select all <div> elements with the specified custom attributes
+        let allCards = document.querySelectorAll('div[data-card-movieTitle]');
+
+        // Get the dropdown items
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+
+        // Add click event listeners to each dropdown item
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                // Get the data-icons attributes value
+                const iconClass = this.getAttribute('data-icon');
+                const searchLabelText = this.getAttribute('data-label-text');
+
+                // Find the icon of the button and the search label
+                const buttonIcon = document.getElementById("searchButtonIconIndicator");
+                const searchLabel = document.getElementById("searchLabel");
+
+                //update their values
+                buttonIcon.className = 'fa-solid ' + iconClass;
+                searchLabel.innerText = searchLabelText;
+                //used to update search
+                document.getElementById("searchButton").setAttribute('data-label-text', searchLabelText);
+            });
+        });
+
+        function activateSearch() {
+            // Loop through the selected elements
+            allCards.forEach(function (element) {
+                // Access the custom attribute values
+                let movieTitleValue = element.getAttribute('data-card-movieTitle').trim().toLowerCase();
+                let directorValue = element.getAttribute('data-card-director').trim().toLowerCase();
+                let dateValue = element.getAttribute('data-card-date').trim();
+                let searchMode = document.getElementById("searchButton").getAttribute('data-label-text');
+                let searchValue = document.getElementById("searchInput").value;
+
+                if ((!movieTitleValue.includes(searchValue.toLowerCase()) && searchMode === "Search By Title:") ||
+                    (!directorValue.includes(searchValue.toLowerCase()) && searchMode === "Search By Director:") ||
+                    (!dateValue.includes(searchValue) && searchMode === "Search By Date:")
+                ) {
+                    element.style.display = 'none';
+                    element.setAttribute('data-card-hiddenBySearch', 'true');
+                }
+                else if (element.getAttribute('data-card-hiddenByOtherFilters') === 'false') {
+                    element.style.display = 'block';
+                    element.setAttribute('data-card-hiddenBySearch', 'false');
+                }
+                //just set that the search would have allowed it
+                else {
+                    element.setAttribute('data-card-hiddenBySearch', 'false');
+                }
+            });
+        }
+
+        function sortCardsBy(orderMode) {
+            // Extract the custom attribute values and associated elements into an array of objects
+            let cardData = [];
+            allCards.forEach(function (element) {
+                let movieTitleValue = element.getAttribute('data-card-movieTitle');
+                let categoryValue = element.getAttribute('data-card-category');
+                let dateValue = element.getAttribute('data-card-date');
+                let durationValue = element.getAttribute('data-card-duration');
+                let ratingValue = element.getAttribute('data-card-rating');
+
+                cardData.push({
+                    element: element,
+                    movieTitleValue: movieTitleValue,
+                    categoryValue: categoryValue,
+                    dateValue: dateValue,
+                    durationValue: durationValue,
+                    ratingValue: ratingValue
+                });
+            });
+
+            // Sort the array of objects based on the given mode
+            if (orderMode === "movieTitle") {
+                cardData.sort(function (a, b) {
+                    return a.movieTitleValue.localeCompare(b.movieTitleValue);
+                });
+            }
+            else if (orderMode === "category") {
+                cardData.sort(function (a, b) {
+                    return a.categoryValue.localeCompare(b.categoryValue);
+                });
+            }
+            else if (orderMode === "releaseDate") {
+                // Function to convert the date format
+                const convertDateFormat = (inputDate) => {
+                    const parts = inputDate.split(/[/:]+/);
+                    const day = parseInt(parts[0]);
+                    const month = parseInt(parts[1]);
+                    const year = parseInt(parts[2]);
+                    return `${year}-${month < 10 ? '0' : ''}${month}-${day < 10 ? '0' : ''}${day}`;
+                };
+
+                cardData.sort(function (a, b) {
+                    // Convert date strings to the desired format
+                    const formattedDateA = convertDateFormat(a.dateValue);
+                    const formattedDateB = convertDateFormat(b.dateValue);
+
+                    // Compare the formatted date strings
+                    return formattedDateA.localeCompare(formattedDateB);
+                });
+            }
+            else if (orderMode === "timeDuration") {
+                cardData.sort(function (a, b) {
+                    return parseInt(a.durationValue) - parseInt(b.durationValue);
+                });
+            }
+            else if (orderMode === "rating") {
+                cardData.sort(function (a, b) {
+                    return a.ratingValue.localeCompare(b.ratingValue);
+                });
+            }
+
+            // Clear the current order of elements in the DOM
+            allCards.forEach(function (element) {
+                element.remove();
+            });
+
+            // Append the sorted elements back to the DOM in the new order
+            cardData.forEach(function (card) {
+                document.getElementById("cardContainer").appendChild(card.element); // Modify the target container as needed
+            });
+        }
+
+        function applyAdditionalFilters() {
+            let ageRestricted = document.getElementById('ageRestrictedSwitch');
+            let highlyRated = document.getElementById('highlyRatedSwitch');
+
+            // Loop through the selected elements
+            allCards.forEach(function (element) {
+                // Access the custom attribute values
+                let ageRestrictedValue = element.getAttribute('data-card-ageRestriction');
+                let ratingValue = parseInt(element.getAttribute('data-card-rating'));
+                alert(ageRestrictedValue);
+
+                if ((ageRestrictedValue === 'False' && ageRestricted.checked) ||
+                    (ratingValue < 4 && highlyRated.checked)) {
+                    element.style.display = 'none';
+                    element.setAttribute('data-card-hiddenByOtherFilters', 'true');
+                }
+                else if (element.getAttribute('data-card-hiddenBySearch') === 'false') {
+                    element.style.display = 'block';
+                    element.setAttribute('data-card-hiddenByOtherFilters', 'false');
+                }
+                //just set that the other filters would have allowed it
+                else {
+                    element.setAttribute('data-card-hiddenByOtherFilters', 'false');
+                }
+            });
+        }
+    </script>
+}

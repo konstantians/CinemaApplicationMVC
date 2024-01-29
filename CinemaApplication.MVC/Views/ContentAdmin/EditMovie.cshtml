@@ -1,0 +1,349 @@
+﻿@model EditMovieViewModel
+
+@if ((bool)ViewData["MovieProjectionDeletionFailure"]! || (bool)ViewData["MovieUpdateFailure"]! || (bool)ViewData["MovieProjectionCreationFailure"]!)
+{
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </symbol>
+    </svg>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-danger d-flex align-items-center alert-dismissible fade show" role="alert">
+                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                @if((bool)ViewData["MovieUpdateFailure"]!)
+                {
+                   <div>The film information could not be updated. Please try again or contact us through our email kinnaskonstantinos0@gmail.com</div>
+                }
+                else if ((bool)ViewData["MovieProjectionDeletionFailure"]!)
+                {
+                    <div>The film projection could not be deleted. Please try again or contact us through our email kinnaskonstantinos0@gmail.com</div>
+                }
+                else if ((bool)ViewData["MovieProjectionCreationFailure"]!)
+                {
+                    <div>The film projection could not be created. Please try again or contact us through our email kinnaskonstantinos0@gmail.com</div>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+else if ((bool)ViewData["MovieUpdateSuccess"]! ||
+    (bool)ViewData["MovieProjectionCreationSuccess"]! || (bool)ViewData["MovieProjectionDeletionSuccess"]!) 
+{
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+        </symbol>
+    </svg>
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert">
+                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                @* <div>The projection was successfully created!</div> *@
+                @if ((bool)ViewData["MovieUpdateSuccess"]!)
+                {
+                    <div>The film information was successfully updated!</div>
+                }
+                else if ((bool)ViewData["MovieProjectionDeletionSuccess"]!)
+                {
+                    <div>The film projection was successfully deleted!</div>
+                }
+                else if ((bool)ViewData["MovieProjectionCreationSuccess"]!)
+                {
+                    <div>The film projection was successfully created!</div>
+                }
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="shadow col-12 p-3" style="background-color:white;">
+    <h2 class="text-center mb-4">Film Information</h2>
+    <form method="post" asp-controller="ContentAdmin" asp-action="EditMovie">
+        <div class="row">
+            <div class="col-4">
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Title" class="form-label">Film Title</label>
+                    <div class="input-group">
+                        <input type="text" class="form-control" asp-for="@Model.Movie.Title" value="@Model.Movie.Title" readOnly>
+                        <a class="btn btn-outline-primary" id="titleButton"
+                           onclick="toggleInputField('Movie_Title', 'titleButton')">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.Movie.Title" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Director" class="form-label">Director's Name</label>
+                    <div class="input-group">
+                        <input type="text" asp-for="@Model.Movie.Director" class="form-control" value="@Model.Movie.Director" readOnly>
+                        <a class="btn btn-outline-primary" id="directorNameButton"
+                           onclick="toggleInputField('Movie_Director', 'directorNameButton')">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.Movie.Director" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Category" class="form-label">Film Category</label>
+                    <div class="input-group">
+                        <input asp-for="@Model.Movie.Category" type="text" class="form-control" value="@Model.Movie.Category" readOnly>
+                        <a class="btn btn-outline-primary" id="categoryButton"
+                           onclick="toggleInputField('Movie_Category', 'categoryButton')">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.Movie.Category" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-2">
+                    <label asp-for="@Model.Movie.ReleaseDate" class="form-label">Film Release Date</label>
+                    <input asp-for="@Model.Movie.ReleaseDate" type="date" class="form-control" value="@Model.Movie.ReleaseDate.ToString("yyyy-MM-dd")">
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Description" class="form-label">Film Description</label>
+                    <textarea asp-for="@Model.Movie.Description" rows="5" class="form-control">@Model.Movie.Description</textarea>
+                    <span asp-validation-for="@Model.Movie.Description" class="text-danger"></span>
+                </div>
+                <div class="mb-4">
+                    <label asp-for="@Model.Movie.FilmDuration" class="form-label">Film's Duration(minutes)</label>
+                    <div class="input-group">
+                        <input asp-for="@Model.Movie.FilmDuration" type="number" class="form-control" value="@Model.Movie.FilmDuration" readOnly>
+                        <a class="btn btn-outline-primary" id="durationButton"
+                           onclick="toggleInputField('Movie_FilmDuration', 'durationButton')">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.Movie.FilmDuration" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-1">
+                    <label asp-for="@Model.Movie.Rating" class="form-label">Film's Rating</label>
+                    <div class="input-group">
+                        <input asp-for="@Model.Movie.Rating" type="number" class="form-control" value="@Model.Movie.Rating" readOnly>
+                        <a class="btn btn-outline-primary" id="ratingButton"
+                           onclick="toggleInputField('Movie_Rating', 'ratingButton')">
+                            <i class="fa-solid fa-pencil"></i>
+                        </a>
+                    </div>
+                    <span asp-validation-for="@Model.Movie.Rating" class="text-danger"></span>
+                </div>
+                <div class="mb-4 mt-1">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="ageRestricted" asp-for="@Model.Movie.IsAgeRestricted" value="@Model.Movie.IsAgeRestricted" />
+                        <label class="form-check-label" asp-for="@Model.Movie.IsAgeRestricted">
+                            Age Restricted
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="projections-list">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Projections</h5>
+                        <a class="btn btn-primary" href="#" data-bs-toggle="modal" data-bs-target="#createProjectionModal">
+                            <i class="fa-solid fa-plus"></i>
+                        </a>
+                    </div>
+                    <ul class="list-group" id="projectionList">
+                        @foreach (MovieProjection projection in Model.Movie.Projections)
+                        {
+                            string formattedDate = @$"{projection.StartingTime.Year}/{projection.StartingTime.Month}/{projection.StartingTime.Day} " +
+                            @$"{projection.StartingTime.Hour} : {projection.StartingTime.Minute} Until " +
+                            @$"{projection.EndingTime.Hour} : {projection.EndingTime.Minute}";
+                            <li class="list-group-item">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    ID: @projection.Id Movie: @projection.Movie!.Title<br>
+                                    Date: @formattedDate <br>
+                                    <div>
+                                        @* <a class="btn btn-primary ms-3" href="/films/editProjection?projectionId=<%=projection.getId()%>">
+                                    <i class="fa fa-eye" aria-hidden="true"></i></a> *@
+                                        <a class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal-@projection.Id">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <input asp-for="@Model.Movie.Id" value="@Model.Movie.Id" hidden />
+        </div>
+        <div class="d-flex justify-content-center mt-5 ms-3">
+            <button type="submit" class="btn btn-primary" style="width: 20%;">Save Changes</button>
+        </div>
+    </form>
+</div>
+
+<!-- Modal To Add Projection -->
+@foreach (MovieProjection projection in Model.Movie.Projections){
+    <div class="modal fade" id="deleteModal-@projection.Id" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalTitle-@projection.Id">Confirm Projection Deletion Dialog</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="text-align: left;">
+                    Are you certain that you want to delete the projection?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
+                    <form asp-controller="ContentAdmin" asp-action="DeleteProjection">
+                        <input name="projectionId" value="@projection.Id" hidden/>
+                        <input name="movieId" value="@projection.MovieId" hidden />
+                        <button class="btn btn-danger ms-1">Confirm Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Modal To Add Projection -->
+@* <div class="modal fade" id="createProjectionModal" tabindex="-1">
+    <form id="createProjectionForm" method="post" asp-controller="ContentAdmin" asp-action="CreateProjection">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createProjectionTitle">New Projection Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="text-align: left;">
+                    <div class="container">
+                        <div class="row">
+                            <div class="mb-3">
+                                @{
+                                    // Calculate default value: 1 day in the future from now
+                                    DateTime defaultStartingTime = DateTime.Now.AddDays(1);
+                                    DateTime defaultEndingTime = DateTime.Now.AddDays(1).AddHours(2);
+                                }
+                                <label asp-for="Projection.StartingTime" class="form-label">Starting Time:</label>
+                                <div class="input-group">
+                                    <input asp-for="Projection.StartingTime.Date" type="date" value="@defaultStartingTime.ToString("yyyy-MM-dd")" class="form-control">
+                                    <input asp-for="Projection.StartingTime.TimeOfDay" type="time" value="@defaultStartingTime.ToString("HH:mm")" class="form-control">
+                                </div>
+                                <span asp-validation-for="Projection.StartingTime" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Projection.EndingTime" class="form-label">Ending Time:</label>
+                                <div class="input-group">
+                                    <input asp-for="Projection.EndingTime.Date" type="date" value="@defaultEndingTime.ToString("yyyy-MM-dd")" class="form-control">
+                                    <input asp-for="Projection.EndingTime.TimeOfDay" type="time" value="@defaultEndingTime.ToString("HH:mm")" class="form-control">
+                                </div>
+                                <span asp-validation-for="Projection.EndingTime" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Projection.CinemaRoomId" class="form-label">Projection Room:</label>
+                                <select asp-for="Projection.CinemaRoomId" class="form-select">
+                                    @foreach (CinemaRoom cinemaRoom in Model.CinemaRooms)
+                                    {
+                                        <option value="@cinemaRoom.Id">@cinemaRoom.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <input asp-for="Projection.MovieId" value="@Model.Movie.Id" type="hidden">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create Projection</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+ *@
+<!-- Modal To Add Projection -->
+<div class="modal fade" id="createProjectionModal" tabindex="-1">
+    <form id="createProjectionForm" method="post" asp-controller="ContentAdmin" asp-action="CreateProjection">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="createProjectionTitle">New Projection Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="text-align: left;">
+                    <div class="container">
+                        <div class="row">
+                            <div class="mb-3">
+                                @{
+                                    // Calculate default value: 1 day in the future from now
+                                    DateTime defaultStartingTime = DateTime.Now.AddDays(1);
+                                    DateTime defaultEndingTime = DateTime.Now.AddDays(1).AddHours(2);
+                                }
+                                <label asp-for="Projection.StartingTime" class="form-label">Starting Time:</label>
+                                <div class="input-group">
+                                    <input asp-for="Projection.StartingTime" type="datetime-local" value="@defaultStartingTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+                                </div>
+                                <span asp-validation-for="Projection.StartingTime" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Projection.EndingTime" class="form-label">Ending Time:</label>
+                                <div class="input-group">
+                                    <input asp-for="Projection.EndingTime" type="datetime-local" value="@defaultEndingTime.ToString("yyyy-MM-ddTHH:mm")" class="form-control">
+                                </div>
+                                <span asp-validation-for="Projection.EndingTime" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Projection.CinemaRoomId" class="form-label">Projection Room:</label>
+                                <select asp-for="Projection.CinemaRoomId" class="form-select">
+                                    @foreach (CinemaRoom cinemaRoom in Model.CinemaRooms)
+                                    {
+                                        <option value="@cinemaRoom.Id">@cinemaRoom.Name</option>
+                                    }
+                                </select>
+                            </div>
+                            <input asp-for="Projection.MovieId" value="@Model.Movie.Id" type="hidden" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create Projection</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        //Set initial values for starting time(1 hour from now) and ending time(3 hour from now)
+        //const startingTimeInput = document.getElementById("startingTime");
+        //const startingTime = new Date();
+        //startingTime.setHours(startingTime.getHours() + 4);
+        //startingTimeInput.value = startingTime.toISOString().slice(0, 16);
+        //const endingTimeInput = document.getElementById("endingTime");
+        //const endingTime = new Date();
+        //endingTime.setHours(endingTime.getHours() + 6);
+        //endingTimeInput.value = endingTime.toISOString().slice(0, 16);
+
+       
+
+        //edit button functionality
+        function toggleInputField(inputId, buttonId) {
+            let inputField = document.getElementById(inputId);
+            let button = document.getElementById(buttonId);
+
+            if (inputField && button) {
+                if (inputField.readOnly) {
+                    inputField.readOnly = false;
+                    button.innerHTML = '<i class="fa-solid fa-check"></i>';
+                } else {
+                    inputField.readOnly = true;
+                    button.innerHTML = '<i class="fa-solid fa-pencil"></i>';
+                }
+            }
+        }
+
+    </script>
+}

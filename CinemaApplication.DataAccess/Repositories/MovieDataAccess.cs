@@ -51,6 +51,25 @@ public class MovieDataAccess : IMovieDataAccess
         }
     }
 
+    public async Task<Movie> GetMovieByTitleAsync(string title)
+    {
+        try
+        {
+            return await _context.Movies
+               .Include(movie => movie.Projections)
+               .ThenInclude(projection => projection.CinemaRoom)
+               .Include(movie => movie.Projections)
+               .ThenInclude(projection => projection.Tickets)
+               .FirstOrDefaultAsync(movie => movie.Title == title);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
     public async Task<int> CreateMovieAsync(Movie movie)
     {
         try
@@ -63,45 +82,49 @@ public class MovieDataAccess : IMovieDataAccess
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            throw;
+            return -1;
         }
     }
 
-    public async Task UpdateMovieAsync(int id, Movie movie)
+    public async Task<bool> UpdateMovieAsync(int id, Movie movie)
     {
         try
         {
             Movie foundMovie = await GetMovieAsync(id);
             if (foundMovie is null)
-                return;
+                return false;
 
             foundMovie.Title = movie.Title;
             foundMovie.FilmDuration = movie.FilmDuration;
             foundMovie.Director = movie.Director;
             foundMovie.Description = movie.Description;
             foundMovie.Category = movie.Category;
+            foundMovie.ReleaseDate = movie.ReleaseDate;
+            foundMovie.Rating = movie.Rating;
+            foundMovie.IsAgeRestricted = movie.IsAgeRestricted;
 
             await _context.SaveChangesAsync();
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            throw;
+            return false;
         }
     }
 
-    public async Task DeleteMovieAsync(int id)
+    public async Task<bool> DeleteMovieAsync(int id)
     {
         try
         {
             Movie foundMovie = await GetMovieAsync(id);
+            if(foundMovie is null) 
+                return false;
 
-            foreach (MovieProjection projection in foundMovie.Projections)
-            {
-                await _movieProjectionDataAccess.DeleteMovieProjectionAsync(projection.Id);
-            }
             _context.Movies.Remove(foundMovie);
+
             await _context.SaveChangesAsync();
+            return true;
         }
         catch (Exception ex)
         {
