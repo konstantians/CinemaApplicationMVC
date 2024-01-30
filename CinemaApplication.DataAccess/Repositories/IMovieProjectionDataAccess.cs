@@ -9,5 +9,5 @@ public interface IMovieProjectionDataAccess
     Task<bool> DeleteMovieProjectionAsync(int id);
     Task<MovieProjection> GetMovieProjectionAsync(int id);
     Task<IEnumerable<MovieProjection>> GetMovieProjectionsAsync();
-    Task UpdateMovieProjectionAsync(int id, MovieProjection projection);
+    Task<bool> UpdateMovieProjectionAsync(int id, MovieProjection projection);
 }

@@ -12,14 +12,14 @@ public class TicketDataAccess : ITicketDataAccess
         _context = context;
     }
 
-    public async Task<IEnumerable<Ticket>> GetReservationsAsync()
+    public async Task<IEnumerable<Ticket>> GetTicketsAsync()
     {
         try
         {
             return await _context.Tickets
-                .Include(reservation => reservation.MovieProjection)
+                .Include(ticket => ticket.MovieProjection)
                 .ThenInclude(projection => projection.CinemaRoom)
-                .Include(reservation => reservation.MovieProjection)
+                .Include(ticket => ticket.MovieProjection)
                 .ThenInclude(projection => projection.Movie)
                 .ToListAsync();
         }
@@ -30,16 +30,35 @@ public class TicketDataAccess : ITicketDataAccess
         }
     }
 
-    public async Task<Ticket> GetReservationAsync(int id)
+    public async Task<IEnumerable<Ticket>> GetTicketsOfUserAsync(string userId)
     {
         try
         {
             return await _context.Tickets
-                .Include(reservation => reservation.MovieProjection)
+                .Include(ticket => ticket.MovieProjection)
                 .ThenInclude(projection => projection.CinemaRoom)
-                .Include(reservation => reservation.MovieProjection)
+                .Include(ticket => ticket.MovieProjection)
                 .ThenInclude(projection => projection.Movie)
-                .FirstOrDefaultAsync(reservation => reservation.Id == id);
+                .Where(ticket => ticket.UserId == userId)
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            throw;
+        }
+    }
+
+    public async Task<Ticket> GetTicketAsync(int id)
+    {
+        try
+        {
+            return await _context.Tickets
+                .Include(ticket => ticket.MovieProjection)
+                .ThenInclude(projection => projection.CinemaRoom)
+                .Include(ticket => ticket.MovieProjection)
+                .ThenInclude(projection => projection.Movie)
+                .FirstOrDefaultAsync(ticket => ticket.Id == id);
 
         }
         catch (Exception ex)
@@ -49,11 +68,11 @@ public class TicketDataAccess : ITicketDataAccess
         }
     }
 
-    public async Task<int> CreateReservationAsync(Ticket reservation)
+    public async Task<int> CreateTicketAsync(Ticket ticket)
     {
         try
         {
-            var result = await _context.Tickets.AddAsync(reservation);
+            var result = await _context.Tickets.AddAsync(ticket);
             await _context.SaveChangesAsync();
 
             return result.Entity.Id;
@@ -65,37 +84,65 @@ public class TicketDataAccess : ITicketDataAccess
         }
     }
 
-    public async Task UpdateReservationAsync(int id, Ticket reservation)
+    public async Task<bool> UpdateTicketAsync(int id, Ticket ticket)
     {
         try
         {
-            Ticket foundReservation = await GetReservationAsync(id);
-            if (foundReservation is null)
-                return;
+            Ticket foundTicket = await GetTicketAsync(id);
+            if (foundTicket is null)
+                return false;
 
-            foundReservation.ReservationRefundPrice = reservation.ReservationRefundPrice;
-            foundReservation.NumberOfSeats = reservation.NumberOfSeats;
+            foundTicket.ReservationRefundPrice = ticket.ReservationRefundPrice;
+            foundTicket.NumberOfSeats = ticket.NumberOfSeats;
             await _context.SaveChangesAsync();
+            
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            throw;
+            return false;
         }
     }
 
-    public async Task DeleteReservationAsync(int id)
+    public async Task<bool> DeleteTicketsAsync(int id)
     {
         try
         {
-            Ticket foundReservation = await GetReservationAsync(id);
-            _context.Tickets.Remove(foundReservation);
+            Ticket foundTicket = await GetTicketAsync(id);
+            if (foundTicket is null)
+                return false;
+
+            _context.Tickets.Remove(foundTicket);
             await _context.SaveChangesAsync();
+
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            throw;
+            return false;
+        }
+    }
+
+    public async Task<bool> DeleteTicketsOfUser(string userId)
+    {
+        try
+        {
+            var foundTickets = await GetTicketsOfUserAsync(userId);
+
+            if (foundTickets != null && foundTickets.Any())
+            {
+                _context.Tickets.RemoveRange(foundTickets);
+                await _context.SaveChangesAsync();
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return false;
         }
     }
 }

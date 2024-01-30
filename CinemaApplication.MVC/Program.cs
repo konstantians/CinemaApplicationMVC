@@ -74,6 +74,8 @@ namespace CinemaApplication.MVC
             builder.Services.AddScoped<ICinemaRoomDataAccess, CinemaRoomDataAccess>();
             builder.Services.AddScoped<IMovieProjectionDataAccess, MovieProjectionDataAccess>();
             builder.Services.AddScoped<IMovieDataAccess, MovieDataAccess>();
+            builder.Services.AddScoped<IBankCardDataAccess, BankCardDataAccess>();
+            builder.Services.AddScoped<IUserHelperMethods, UserHelperMethods>();
 
             var app = builder.Build();
 

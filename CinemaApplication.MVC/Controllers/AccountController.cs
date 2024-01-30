@@ -1,12 +1,15 @@
 ﻿using CinemaApplication.AuthenticationAndAuthorization.Authentication;
 using CinemaApplication.AuthenticationAndAuthorization.Authorization;
+using CinemaApplication.DataAccess.Repositories;
 using CinemaApplication.EmailServiceLibrary;
 using CinemaApplication.MVC.Models;
 using CinemaApplication.MVC.Models.EditAccountModels;
 using CinemaApplication.SharedModels;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Net.Sockets;
 
 namespace CinemaApplication.MVC.Controllers;
 
@@ -15,13 +18,22 @@ public class AccountController : Controller
     private readonly IAuthenticationProcedures _authenticationProcedures;
     private readonly IAuthorizationProcedures _authorizationProcedures;
     private readonly IEmailService _emailService;
-
+    private readonly IBankCardDataAccess _bankCardDataAccess;
+    private readonly IUserHelperMethods _userHelperMethods;
+    private readonly ITicketDataAccess _ticketDataAccess;
+    private readonly IMovieProjectionDataAccess _movieProjectionDataAccess;
+    
     public AccountController(IAuthenticationProcedures authenticationProcedures, IAuthorizationProcedures authorizationProcedures,
-        IEmailService emailService)
+        IEmailService emailService, IBankCardDataAccess bankCardDataAccess, IUserHelperMethods userHelperMethods, 
+        IMovieProjectionDataAccess movieProjectionDataAccess, ITicketDataAccess ticketDataAccess)
     {
         _authenticationProcedures = authenticationProcedures;
         _authorizationProcedures = authorizationProcedures;
         _emailService = emailService;
+        _bankCardDataAccess = bankCardDataAccess;
+        _userHelperMethods = userHelperMethods;
+        _ticketDataAccess = ticketDataAccess;
+        _movieProjectionDataAccess = movieProjectionDataAccess;
     }
 
     [HttpGet]
@@ -103,14 +115,20 @@ public class AccountController : Controller
     [Authorize]
     public async Task<IActionResult> EditAccount(bool duplicateUsernameError, bool duplicateEmailError,
         bool basicInformationChangeError, bool passwordInformationChangeError,
-        bool basicInformationChangeSuccess, bool passwordChangeSuccess)
+        bool basicInformationChangeSuccess, bool passwordChangeSuccess,
+        bool bankCardCreationSuccess, bool bankCardCreationFailure,
+        bool bankCardUpdateSuccess, bool bankCardUpdateFailure,
+        bool bankCardDeletionSuccess, bool bankCardDeletionFailure,
+        bool ticketDeletionSuccess, bool ticketDeletionFailure)
     {
-        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        AppUser appUser = await _userHelperMethods.GetUserWithBankCardsAndTickets();
         AccountBasicSettingsViewModel accountBasicSettingsViewModel = new()
         {
             Username = appUser.UserName,
             PhoneNumber = appUser.PhoneNumber,
-            AccountType = await _authorizationProcedures.GetUserRoleAsync(appUser.Id)
+            AccountType = await _authorizationProcedures.GetUserRoleAsync(appUser.Id),
+            BankCards = appUser.BankCards,
+            Tickets = appUser.Tickets
         };
 
         ChangePasswordModel changePasswordModel = new()
@@ -135,6 +153,15 @@ public class AccountController : Controller
         ViewData["BasicInformationChangeSuccess"] = basicInformationChangeSuccess;
         ViewData["PasswordChangeSuccess"] = passwordChangeSuccess;
 
+        ViewData["BankCardCreationSuccess"] = bankCardCreationSuccess;
+        ViewData["BankCardCreationFailure"] = bankCardCreationFailure;
+        ViewData["BankCardUpdateSuccess"] = bankCardUpdateSuccess;
+        ViewData["BankCardUpdateFailure"] = bankCardUpdateFailure;
+        ViewData["BankCardDeletionSuccess"] = bankCardDeletionSuccess;
+        ViewData["BankCardDeletionFailure"] = bankCardDeletionFailure;
+
+        ViewData["TicketDeletionSuccess"] = ticketDeletionSuccess;
+        ViewData["TicketDeletionFailure"] = ticketDeletionFailure;
         return View(editAccountModel);
     }
 
@@ -145,7 +172,7 @@ public class AccountController : Controller
         AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
         appUser.UserName = accountBasicSettingsViewModel.Username;
         appUser.PhoneNumber = accountBasicSettingsViewModel.PhoneNumber;
-
+     
         if (appUser.UserName != accountBasicSettingsViewModel.Username)
         {
             if(await _authenticationProcedures.FindByUsernameAsync(accountBasicSettingsViewModel.Username) is not null)
@@ -290,14 +317,14 @@ public class AccountController : Controller
         {
             appUser = await _authenticationProcedures.FindByUsernameAsync(username);
         }
-
+        
         if(appUser is null)
         {
             return RedirectToAction("SignIn", "Account", new { falseResetAccount = true });
         }
-
+    
         string resetToken = await _authenticationProcedures.CreateResetPasswordTokenAsync(appUser);
-
+        
         //maybe do a check here
         string message = "Click on the following link to reset your account password:";
         string? link = Url.Action("ResetPassword", "Account", new { userId = WebUtility.UrlEncode(appUser.Id), 
@@ -306,5 +333,86 @@ public class AccountController : Controller
         ViewData["EmailSendSuccessfully"] = await _emailService.SendEmailAsync(appUser.Email, "Email Confirmation", confirmationLink);
 
         return View("ResetPasswordEmailMessage");
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> CreateBankCard(BankCard bankCard)
+    {
+        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        bankCard.UserId = appUser.Id;
+
+        int result = await _bankCardDataAccess.CreateBankCardAsync(bankCard);
+        if(result == -1)
+        {
+            return RedirectToAction("EditAccount", "Account", new { bankCardCreationFailure = true });
+        }
+        return RedirectToAction("EditAccount", "Account", new { bankCardCreationSuccess = true });
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> EditBankCard(BankCard bankCard)
+    {
+        bool result = await _bankCardDataAccess.UpdateBankCardAsync(bankCard.Id, bankCard);
+        if (!result)
+        {
+            return RedirectToAction("EditAccount", "Account", new { bankCardUpdateFailure = true });
+        }
+        return RedirectToAction("EditAccount", "Account", new { bankCardUpdateSuccess = true });
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> RemoveBankCard(int bankCardId)
+    {
+        bool result = await _bankCardDataAccess.DeleteBankCardAsync(bankCardId);
+        if (!result)
+        {
+            return RedirectToAction("EditAccount", "Account", new { bankCardDeletionFailure = true });
+        }
+        return RedirectToAction("EditAccount", "Account", new { bankCardDeletionSuccess = true });
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> PurchaseTicket(Ticket ticket)
+    {
+        MovieProjection projection = await _movieProjectionDataAccess.GetMovieProjectionAsync(ticket.MovieProjectionId);
+        if(projection is null)
+            return RedirectToAction("CinemaProgram", "Home", new { createTicketFailure = true});
+
+        if (projection.SeatsLeft < ticket.NumberOfSeats)
+            return RedirectToAction("CinemaProgram", "Home", new { noSeatsLeft = true });
+
+        projection.SeatsLeft -= ticket.NumberOfSeats;
+        bool result = await _movieProjectionDataAccess.UpdateMovieProjectionAsync(projection.Id, projection);
+        if(!result)
+            return RedirectToAction("CinemaProgram", "Home", new { createTicketFailure = true });
+
+        int ticketId = await _ticketDataAccess.CreateTicketAsync(ticket);
+        if (ticketId == -1)
+            return RedirectToAction("CinemaProgram", "Home", new { createTicketFailure = true});
+        
+        return RedirectToAction("CinemaProgram", "Home" , new {createTicketSuccess = true});
+    }
+
+    [Authorize]
+    public async Task<IActionResult> RefundTicket(int projectionId, int ticketId, int numberOfSeats)
+    {
+        MovieProjection projection = await _movieProjectionDataAccess.GetMovieProjectionAsync(projectionId);
+        if (projection is null)
+            return RedirectToAction("EditAccount", "Account", new { ticketDeletionFailure = true });
+
+        projection.SeatsLeft += numberOfSeats;
+        bool result = await _movieProjectionDataAccess.UpdateMovieProjectionAsync(projection.Id, projection);
+        if (!result)
+            return RedirectToAction("EditAccount", "Account", new { ticketDeletionFailure = true });
+
+        result = await _ticketDataAccess.DeleteTicketsAsync(ticketId);
+        if(!result)
+            return RedirectToAction("EditAccount", "Account", new { ticketDeletionFailure = true });
+
+        return RedirectToAction("EditAccount", "Account", new { ticketDeletionSuccess = true });
     }
 }

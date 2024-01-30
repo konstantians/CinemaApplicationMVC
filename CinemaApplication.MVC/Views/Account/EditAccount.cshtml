@@ -4,8 +4,10 @@
     ViewData["Title"] = "Edit Account";
 }
 
-@if ((bool)ViewData["DuplicateUsernameError"] || (bool)ViewData["DuplicateEmailError"] ||
-   (bool)ViewData["BasicInformationChangeError"] || (bool)ViewData["PasswordChangeError"])
+@if ((bool)ViewData["DuplicateUsernameError"]! || (bool)ViewData["DuplicateEmailError"]! ||
+   (bool)ViewData["BasicInformationChangeError"]! || (bool)ViewData["PasswordChangeError"]! ||
+   (bool)ViewData["BankCardCreationFailure"]! || (bool)ViewData["BankCardUpdateFailure"]! ||
+  (bool)ViewData["BankCardDeletionFailure"]! || (bool)ViewData["TicketDeletionFailure"]!)
 {
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
         <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
@@ -16,21 +18,48 @@
         <div class="col-12">
             <div class="alert alert-danger d-flex align-items-center alert-dismissible fade show" role="alert">
                 <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
-                @if ( (bool)ViewData["DuplicateUsernameError"]){
+                @if ( (bool)ViewData["DuplicateUsernameError"]!){
                     <div>There is another user with the given username.</div>
                 }
-                else if ( (bool)ViewData["DuplicateEmailError"]){
+                else if ( (bool)ViewData["DuplicateEmailError"]!){
                     <div>There is another user with the given email.</div>
                 }
-                else if ((bool)ViewData["BasicInformationChangeError"] ){
+                else if ((bool)ViewData["BasicInformationChangeError"]!){
                     <div>
                         Something went wrong while updating your account's basic information.                 
                         Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
                     </div>
                 }
-                else if ((bool)ViewData["PasswordChangeError"]){
+                else if ((bool)ViewData["PasswordChangeError"]!){
                     <div>
                         Something went wrong while updating your account password.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if ((bool)ViewData["BankCardCreationFailure"]!)
+                {
+                    <div>
+                        Unfortunately your bankCard could not be added.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if ((bool)ViewData["BankCardUpdateFailure"]!)
+                {
+                    <div>
+                        Unfortunately your bankCard information could not be updated.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if ((bool)ViewData["BankCardDeletionFailure"]!)
+                {
+                    <div>
+                        Unfortunately your bankCard could not be removed from your account.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if((bool)ViewData["TicketDeletionFailure"]!){
+                    <div>
+                        Unfortunately your ticket could not be refunded.
                         Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
                     </div>
                 }
@@ -39,7 +68,9 @@
         </div>
     </div>
 }
-else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["PasswordChangeSuccess"])
+else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["PasswordChangeSuccess"]! || 
+         (bool)ViewData["BankCardCreationSuccess"]! || (bool)ViewData["BankCardUpdateSuccess"]! ||
+         (bool)ViewData["BankCardDeletionSuccess"]! || (bool)ViewData["TicketDeletionSuccess"]!)
 {
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
         <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
@@ -50,23 +81,27 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
         <div class="col-12">
             <div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert">
                 <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-                @if ( (bool)ViewData["BasicInformationChangeSuccess"]){
+                @if ( (bool)ViewData["BasicInformationChangeSuccess"]!){
                     <div>Your account's basic information has been updated successfully!</div>
                 }
-                else if ((bool)ViewData["PasswordChangeSuccess"])
+                else if ((bool)ViewData["PasswordChangeSuccess"]!)
                 {
                     <div>Your account password has been updated successfully!</div>
                 }
-                @* else if(request.getSession().getAttribute("deleteTicketSuccessMessage") != null){%>
-                    <div>The ticket has been refunded successfully!</div>
-                    <% request.getSession().removeAttribute("deleteTicketSuccessMessage"); %>
-                <%}else if(request.getSession().getAttribute("deleteBankCardSuccessMessage") != null){%>
-                    <div>The bank card was removed successfully!</div>
-                    <% request.getSession().removeAttribute("deleteBankCardSuccessMessage"); %>
-                <%}else if(request.getSession().getAttribute("bankCardCreatedAlert") != null){%>
-                    <div>The bank card was successfully added to your account!</div>
-                    <% request.getSession().removeAttribute("bankCardCreatedAlert"); %>
-                <%}%> *@
+                else if ((bool) ViewData["BankCardCreationSuccess"]!){
+                    <div>Your bankCard has successfully been added to your account!</div>
+                }
+                else if ((bool)ViewData["BankCardUpdateSuccess"]!)
+                {
+                    <div>Your bankCard information has successfully been updated!</div>
+                }
+                else if ((bool)ViewData["BankCardDeletionSuccess"]!)
+                {
+                    <div>Your bankCard has successfully been removed from your account!</div>
+                }
+                else if ((bool)ViewData["TicketDeletionSuccess"]!){
+                    <div>Your ticket has successfully been refunded!</div>
+                }
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
@@ -80,34 +115,38 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
             <div class="row">
                 <h4 class="text-center">Basic Account Settings </h4>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.AccountBasicSettingsViewModel.Username"><i class="fa-solid fa-user me-2"></i>Account Username</label>
+                    <label class="form-label" asp-for="@Model.AccountBasicSettingsViewModel.Username">
+                        <i class="fa-solid fa-user me-2"></i>Account Username</label>
                     <div class="input-group">
-                        <input type="text" class="form-control" id="username" asp-for="@Model.AccountBasicSettingsViewModel.Username"
+                        <input type="text" class="form-control" asp-for="@Model.AccountBasicSettingsViewModel.Username"
                                value="@Model.AccountBasicSettingsViewModel.Username" readOnly>
-                        <a class="btn btn-outline-primary" id="usernameButton" onclick="toggleInputField('username', 'usernameButton')">
+                        <a class="btn btn-outline-primary" id="usernameButton" 
+                        onclick="toggleInputField('AccountBasicSettingsViewModel_Username', 'usernameButton')">
                             <i class="fa-solid fa-pencil"></i>
                         </a>
                     </div>
                     <span asp-validation-for="@Model.AccountBasicSettingsViewModel.Username" class="text-danger"></span>
                 </div>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"><i class="fa-solid fa-phone me-2"></i>Account Phone Number</label>
+                    <label class="form-label" asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber">
+                        <i class="fa-solid fa-phone me-2"></i>Account Phone Number</label>
                     <div class="input-group">
-                        <input type="tel" class="form-control" id="phone" asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"
+                        <input type="tel" class="form-control" asp-for="@Model.AccountBasicSettingsViewModel.PhoneNumber"
                                value="@Model.AccountBasicSettingsViewModel.PhoneNumber" readOnly>
                         <a class="btn btn-outline-primary" id="phoneNumberButton"
-                           onclick="toggleInputField('phone', 'phoneNumberButton')">
+                           onclick="toggleInputField('AccountBasicSettingsViewModel_PhoneNumber', 'phoneNumberButton')">
                             <i class="fa-solid fa-pencil"></i>
                         </a>
                     </div>
                     <span asp-validation-for="@Model.AccountBasicSettingsViewModel.PhoneNumber" class="text-danger"></span>
                 </div>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.AccountBasicSettingsViewModel.AccountType"><i class="form-label"></i>Account Type</label>
-                    <input type="text" class="form-control" id="accountType" asp-for="@Model.AccountBasicSettingsViewModel.AccountType"
+                    <label class="form-label" asp-for="@Model.AccountBasicSettingsViewModel.AccountType">
+                        <i class="form-label"></i>Account Type</label>
+                    <input type="text" class="form-control" asp-for="@Model.AccountBasicSettingsViewModel.AccountType"
                            value="@Model.AccountBasicSettingsViewModel.AccountType" readOnly>
                 </div>
-                <div class="d-flex justify-content-center mt-5">
+                <div class="d-flex justify-content-center mt-4">
                     <button type="submit" class="btn btn-primary">Confirm Changes</button>
                 </div>
             </div>
@@ -116,9 +155,10 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
             <div class="row">
                 <h4 class="text-center">Sensitive Account Settings </h4>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.ChangePasswordModel.OldPassword"><i class="fa-solid fa-lock me-2"></i>Account Password</label>
+                    <label class="form-label" asp-for="@Model.ChangePasswordModel.OldPassword">
+                        <i class="fa-solid fa-lock me-2"></i>Account Password</label>
                     <div class="input-group">
-                        <input type="password" class="form-control" id="password" asp-for="@Model.ChangePasswordModel.OldPassword"
+                        <input type="password" class="form-control" asp-for="@Model.ChangePasswordModel.OldPassword"
                                value="@Model.ChangePasswordModel.OldPassword" readOnly>
                         <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
                             <i class="fa-solid fa-pencil"></i>
@@ -127,9 +167,10 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                     <span asp-validation-for="@Model.ChangePasswordModel.OldPassword" class="text-danger"></span>
                 </div>
                 <div class="col-12 mb-4 mt-1">
-                    <label asp-for="@Model.ChangeEmailModel.OldEmail"><i class="fa-solid fa-envelope me-2"></i>Account Email</label>
+                    <label class="form-label" asp-for="@Model.ChangeEmailModel.OldEmail">
+                        <i class="fa-solid fa-envelope me-2"></i>Account Email</label>
                     <div class="input-group">
-                        <input type="email" class="form-control" id="email" asp-for="@Model.ChangeEmailModel.OldEmail"
+                        <input type="email" class="form-control" asp-for="@Model.ChangeEmailModel.OldEmail"
                                value="@Model.ChangeEmailModel.OldEmail" readOnly>
                         <a class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#changeEmailModal">
                             <i class="fa-solid fa-pencil"></i>
@@ -139,43 +180,48 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                 </div>
             </div>
         </div>
-        @* <div class="col-4">
+        <div class="col-4">
             <h5 class="text-start">Account Tickets</h5>
             <ul class="list-group mb-4" id="ticketsList">
-                <% for (Ticket ticket : user.getTickets()) { %>
-                <li class="list-group-item">
-                    <div class="d-flex align-items-center justify-content-between">
-                        Ticket ID: <%=ticket.getTicketId()%> <br>
-                        Title: <%=ProjectionDataAccess.getProjection(ticket.getProjectionId()).getFilmTitle()%> <br>
-                        Date: <%=ProjectionDataAccess.getProjection(ticket.getProjectionId()).getStartingTime()%> <br>
-                        Seat: <%=ticket.getSeat()%>
-                        <div>
-                            <a class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal-<%=ticket.getTicketId()%>">
-                                <i class="fa-solid fa-trash-can"></i></a>
-                        </div>
-                        <!-- Modal -->
-                        <div class="modal fade" id="deleteModal-<%=ticket.getTicketId()%>" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="deleteModalTitle-<%=ticket.getTicketId()%>">Refund Ticket Dialog</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body" style="text-align: left;">
-                                        Are you sure you want to refund this ticket?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <a class="btn btn-danger ms-1"
-                                            href="/deleteTicket?ticketId=<%=ticket.getTicketId()%>">
-                                            Confirm Refund</a>
+                @foreach (Ticket ticket in Model.AccountBasicSettingsViewModel.Tickets)
+                {
+                    <li class="list-group-item">
+                        <div class="d-flex align-items-center justify-content-between">
+                            Ticket ID: @ticket.Id <br>
+                            Title: @ticket.MovieProjection!.Movie!.Title <br>
+                            Date: @ticket.MovieProjection!.StartingTime<br>
+                            Seats: @ticket.NumberOfSeats & Refund Price: @ticket.ReservationRefundPrice € 
+                            <div>
+                                <a class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteTicketModal-@ticket.Id">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                            <!-- Modal -->
+                            <div class="modal fade" id="deleteTicketModal-@ticket.Id" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteTicketModalTitle-@ticket.Id">Refund Ticket Dialog</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body" style="text-align: left;">
+                                            Are you sure you want to refund this ticket?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                                            <form asp-action="RefundTicket" asp-controller="Account">
+                                                <input name="projectionId" value="@ticket.MovieProjectionId" hidden/>
+                                                <input name="ticketId" value="@ticket.Id" hidden/>
+                                                <input name="numberOfSeats" value="@ticket.NumberOfSeats" hidden/>
+                                                <button type="submit" class="btn btn-danger ms-1">Confirm Refund</button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </li>
-                <%}%>
+                    </li>
+                }
             </ul>
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="mb-0">Account BankCards</h5>
@@ -184,41 +230,45 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
                 </a>
             </div>
             <ul class="list-group" id="bankCardsList">
-                <% for (BankCard bankCard : user.getBankCards()) { %>
-                <li class="list-group-item">
-                    <div class="d-flex align-items-center justify-content-between">
-                        Number: <%=bankCard.getCardNumber()%>
-                        <div>
-                            <a class="btn btn-primary ms-3" href="/editBankCard?bankCardNumber=<%=bankCard.getCardNumber()%>">
-                                <i class="fa fa-eye" aria-hidden="true"></i></a>
-                            <a class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal-<%=bankCard.getCardNumber()%>">
-                                <i class="fa-solid fa-trash-can"></i></a>
-                        </div>
-                        <!-- Modal -->
-                        <div class="modal fade" id="deleteModal-<%=bankCard.getCardNumber()%>" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="deleteModalTitle-<%=bankCard.getCardNumber()%>">Remove BankCard Dialog</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body" style="text-align: left;">
-                                        Are you sure you want to remove this bankcard?
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                                        <a class="btn btn-danger ms-1"
-                                            href="/deleteBankCard?bankCardNumber=<%=bankCard.getCardNumber()%>">
-                                            Confirm Removal</a>
+                @foreach (BankCard bankCard in Model.AccountBasicSettingsViewModel.BankCards)
+                {
+                    <li class="list-group-item">
+                        <div class="d-flex align-items-center justify-content-between">
+                            Card Number: @bankCard.CardNumber
+                            <div>
+                                <a class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal-@bankCard.Id">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal-@bankCard.Id">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </a>
+                            </div>
+                            <!-- Modal -->
+                            <div class="modal fade" id="deleteModal-@bankCard.Id" tabindex="-1">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="deleteModalTitle-@bankCard.Id">Remove BankCard Dialog</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body" style="text-align: left;">
+                                            Are you sure you want to remove this bankcard?
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                                            <form asp-controller="Account" asp-action="RemoveBankCard">
+                                                <input name="bankCardId" value="@bankCard.Id" hidden/>
+                                                <button type="submit" class="btn btn-danger ms-1">Confirm Removal</button>
+                                            </form>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </li>
-                <%}%>
+                    </li>
+                }
             </ul>
-        </div> *@
+        </div>
     </div>
 </div>
 
@@ -296,57 +346,103 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
     </form>
 </div>
 
-
 <!-- Modal To Add BankCard -->
 <div class="modal fade" id="createBankCardModal" tabindex="-1">
-    <form id="createBankCardForm" method="post" onsubmit="validateBankCardForm(event)"
-          action="/films/createBankCard">
+    <form id="createBankCardForm" method="post" asp-action="createBankCard" asp-controller="Account">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="createProjectionTitle">New BankCard Form</h5>
+                    <h5 class="modal-title" id="createBankCardModalTitle">Add BankCard Form</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body" style="text-align: left;">
-
                     <div class="container">
                         <div class="row">
                             <div class="col-12 mb-3">
-                                <label for="cardNumber" class="form-label">Card Number:</label>
-                                <input type="text" class="form-control" id="cardNumber"
-                                       name="cardNumber">
-                                <span id="cardNumberError" class="error-message"></span>
+                                <label asp-for="@Model.BankCard.CardNumber" class="form-label">Card Number</label>
+                                <input asp-for="@Model.BankCard.CardNumber" type="text" class="form-control">
+                                <span asp-validation-for="@Model.BankCard.CardNumber" class="text-danger"></span>
                             </div>
                             <div class=" col-12 mb-3">
-                                <label for="cardHolderName" class="form-label">CardHolder Name:</label>
-                                <input type="text" class="form-control" id="cardHolderName"
-                                       name="cardHolderName">
-                                <span id="cardHolderNameError" class="error-message"></span>
+                                <label asp-for="@Model.BankCard.CardHolderName" class="form-label">CardHolder Name</label>
+                                <input asp-for="@Model.BankCard.CardHolderName" type="text" class="form-control">
+                                <span asp-validation-for="@Model.BankCard.CardHolderName" class="text-danger"></span>
                             </div>
                             <div class="row mb-3">
                                 <div class="col-6">
-                                    <label for="cvc" class="form-label">CVC:</label>
-                                    <input type="password" class="form-control" id="cvc" name="cvc">
-                                    <span id="cvcError" class="error-message"></span>
+                                    <label asp-for="@Model.BankCard.CVC" class="form-label">CVC</label>
+                                    <input asp-for="@Model.BankCard.CVC" type="text" class="form-control">
+                                    <span asp-validation-for="@Model.BankCard.CVC" class="text-danger"></span>
                                 </div>
                                 <div class="col-6">
-                                    <label for="expirationDate" class="form-label">ExpirationDate:</label>
-                                    <input type="month" class="form-control" id="expirationDate" name="expirationDate">
-                                    <span id="expirationDateError" class="error-message"></span>
+                                    <label asp-for="@Model.BankCard.ExpirationDate" class="form-label">ExpirationDate</label>
+                                    <input asp-for="@Model.BankCard.ExpirationDate" type="month" class="form-control">
+                                    <span asp-validation-for="@Model.BankCard.ExpirationDate" class="text-danger"></span>
                                 </div>
                             </div>
-                            <input name="userUsername" value="<%= user.getUsername() %>" type="hidden">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-primary">Add BankCard</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </div>
         </div>
     </form>
 </div>
+
+<!-- Modals To Edit BankCard -->
+@foreach (BankCard bankCard in Model.AccountBasicSettingsViewModel.BankCards)
+{
+    <div class="modal fade" id="editModal-@bankCard.Id" tabindex="-1">
+        <form id="editBankCardForm-@bankCard.Id" method="post" asp-action="editBankCard" asp-controller="Account">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalTitle-@bankCard.Id">Edit BankCard Form</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" style="text-align: left;">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label asp-for="@Model.BankCard.CardNumber" class="form-label">Card Number</label>
+                                    <input asp-for="@Model.BankCard.CardNumber" value="@bankCard.CardNumber" type="text" class="form-control">
+                                    <span asp-validation-for="@Model.BankCard.CardNumber" class="text-danger"></span>
+                                </div>
+                                <div class=" col-12 mb-3">
+                                    <label asp-for="@Model.BankCard.CardHolderName" class="form-label">CardHolder Name</label>
+                                    <input asp-for="@Model.BankCard.CardHolderName" value="@bankCard.CardHolderName" type="text" class="form-control">
+                                    <span asp-validation-for="@Model.BankCard.CardHolderName" class="text-danger"></span>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label asp-for="@Model.BankCard.CVC" class="form-label">CVC</label>
+                                        <input asp-for="@Model.BankCard.CVC" type="text" value="@bankCard.CVC" class="form-control">
+                                        <span asp-validation-for="@Model.BankCard.CVC" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-6">
+                                        <label asp-for="@Model.BankCard.ExpirationDate" class="form-label">ExpirationDate</label>
+                                        <input asp-for="@Model.BankCard.ExpirationDate" value="@bankCard.ExpirationDate.ToString("yyyy-MM")" 
+                                        type="month" class="form-control">
+                                        <span asp-validation-for="@Model.BankCard.ExpirationDate" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <input asp-for="@Model.BankCard.Id" value="@bankCard.Id" hidden/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Update BankCard</button>
+                        <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+}
+
 
 @section Scripts {
     @{
@@ -356,15 +452,19 @@ else if((bool) ViewData["BasicInformationChangeSuccess"] || (bool)ViewData["Pass
     <script>
         //edit button functionality
         function toggleInputField(inputId, buttonId) {
+            alert(inputId);
+            alert(buttonId);
             let inputField = document.getElementById(inputId);
             let button = document.getElementById(buttonId);
 
             if (inputField && button) {
                 if (inputField.readOnly) {
-                    inputField.readOnly = false;
+                    inputField.removeAttribute("contenteditable");
+                    //inputField.readOnly = false;
                     button.innerHTML = '<i class="fa-solid fa-check"></i>';
                 } else {
-                    inputField.readOnly = true;
+                    inputField.setAttribute("contenteditable", "true");
+                    //inputField.readOnly = true;
                     button.innerHTML = '<i class="fa-solid fa-pencil"></i>';
                 }
             }

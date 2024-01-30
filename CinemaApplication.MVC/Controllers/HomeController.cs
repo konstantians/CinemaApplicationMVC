@@ -1,4 +1,5 @@
-﻿using CinemaApplication.DataAccess.Repositories;
+﻿using CinemaApplication.AuthenticationAndAuthorization.Authentication;
+using CinemaApplication.DataAccess.Repositories;
 using CinemaApplication.MVC.Models;
 using CinemaApplication.SharedModels;
 using Microsoft.AspNetCore.Authorization;
@@ -9,13 +10,16 @@ namespace CinemaApplication.MVC.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly IMovieDataAccess _movieDataAccess;
+        private readonly IBankCardDataAccess _bankCardDataAccess;
+        private readonly IAuthenticationProcedures _authenticationProcedures;
 
-        public HomeController(ILogger<HomeController> logger, IMovieDataAccess movieDataAccess)
+        public HomeController(IMovieDataAccess movieDataAccess, IBankCardDataAccess bankCardDataAccess,
+            IAuthenticationProcedures authenticationProcedures)
         {
-            _logger = logger;
             _movieDataAccess = movieDataAccess;
+            _bankCardDataAccess = bankCardDataAccess;
+            _authenticationProcedures = authenticationProcedures;
         }
 
         [AllowAnonymous]
@@ -30,7 +34,12 @@ namespace CinemaApplication.MVC.Controllers
             return View();
         }
 
-
+        //TODO maybe we need user stuff here
+        [AllowAnonymous]
+        public IActionResult PurchaseTickets()
+        {
+            return View();
+        }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
@@ -38,10 +47,37 @@ namespace CinemaApplication.MVC.Controllers
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        public async Task<IActionResult> CinemaProgram()
+        //TODO maybe we need user stuff here
+        [AllowAnonymous]
+        public async Task<IActionResult> CinemaProgram(bool createTicketFailure, bool createTicketSuccess, bool noSeatsLeft)
         {
-            var movies = await _movieDataAccess.GetMoviesAsync();
-            return View(movies.ToList());
+            var result = await _movieDataAccess.GetMoviesAsync();
+            List<Movie> movies = result.ToList();
+            
+            AppUser user = await _authenticationProcedures.GetCurrentUserAsync();
+            IEnumerable<BankCard> result2;
+            if (user is null)
+            {
+                result2 = null;
+            }
+            else
+            {
+                result2 = await _bankCardDataAccess.GetBankCardsOfUserAsync(user.Id);
+            }
+            List<BankCard> bankCards = result2 is not null ? result2.ToList() : null;
+
+            CinemaProgramViewModel cinemaProgramViewModel = new()
+            {
+                UserId = user is null ? null : user!.Id, 
+                Movies = movies,
+                BankCards = bankCards!
+            };
+
+            ViewData["CreateTicketSuccess"] = createTicketSuccess;
+            ViewData["CreateTicketFailure"] = createTicketFailure;
+            ViewData["NoSeatsLeft"] = noSeatsLeft;
+
+            return View(cinemaProgramViewModel);
         }
     }
 }

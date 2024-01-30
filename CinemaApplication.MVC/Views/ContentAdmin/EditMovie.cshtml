@@ -40,7 +40,6 @@ else if ((bool)ViewData["MovieUpdateSuccess"]! ||
         <div class="col-12">
             <div class="alert alert-success d-flex align-items-center alert-dismissible fade show" role="alert">
                 <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
-                @* <div>The projection was successfully created!</div> *@
                 @if ((bool)ViewData["MovieUpdateSuccess"]!)
                 {
                     <div>The film information was successfully updated!</div>
@@ -158,8 +157,6 @@ else if ((bool)ViewData["MovieUpdateSuccess"]! ||
                                     ID: @projection.Id Movie: @projection.Movie!.Title<br>
                                     Date: @formattedDate <br>
                                     <div>
-                                        @* <a class="btn btn-primary ms-3" href="/films/editProjection?projectionId=<%=projection.getId()%>">
-                                    <i class="fa fa-eye" aria-hidden="true"></i></a> *@
                                         <a class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal-@projection.Id">
                                             <i class="fa-solid fa-trash-can"></i>
                                         </a>
@@ -204,61 +201,6 @@ else if ((bool)ViewData["MovieUpdateSuccess"]! ||
 }
 
 <!-- Modal To Add Projection -->
-@* <div class="modal fade" id="createProjectionModal" tabindex="-1">
-    <form id="createProjectionForm" method="post" asp-controller="ContentAdmin" asp-action="CreateProjection">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="createProjectionTitle">New Projection Form</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" style="text-align: left;">
-                    <div class="container">
-                        <div class="row">
-                            <div class="mb-3">
-                                @{
-                                    // Calculate default value: 1 day in the future from now
-                                    DateTime defaultStartingTime = DateTime.Now.AddDays(1);
-                                    DateTime defaultEndingTime = DateTime.Now.AddDays(1).AddHours(2);
-                                }
-                                <label asp-for="Projection.StartingTime" class="form-label">Starting Time:</label>
-                                <div class="input-group">
-                                    <input asp-for="Projection.StartingTime.Date" type="date" value="@defaultStartingTime.ToString("yyyy-MM-dd")" class="form-control">
-                                    <input asp-for="Projection.StartingTime.TimeOfDay" type="time" value="@defaultStartingTime.ToString("HH:mm")" class="form-control">
-                                </div>
-                                <span asp-validation-for="Projection.StartingTime" class="text-danger"></span>
-                            </div>
-                            <div class="mb-3">
-                                <label asp-for="Projection.EndingTime" class="form-label">Ending Time:</label>
-                                <div class="input-group">
-                                    <input asp-for="Projection.EndingTime.Date" type="date" value="@defaultEndingTime.ToString("yyyy-MM-dd")" class="form-control">
-                                    <input asp-for="Projection.EndingTime.TimeOfDay" type="time" value="@defaultEndingTime.ToString("HH:mm")" class="form-control">
-                                </div>
-                                <span asp-validation-for="Projection.EndingTime" class="text-danger"></span>
-                            </div>
-                            <div class="mb-3">
-                                <label asp-for="Projection.CinemaRoomId" class="form-label">Projection Room:</label>
-                                <select asp-for="Projection.CinemaRoomId" class="form-select">
-                                    @foreach (CinemaRoom cinemaRoom in Model.CinemaRooms)
-                                    {
-                                        <option value="@cinemaRoom.Id">@cinemaRoom.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            <input asp-for="Projection.MovieId" value="@Model.Movie.Id" type="hidden">
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Create Projection</button>
-                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
-                </div>
-            </div>
-        </div>
-    </form>
-</div>
- *@
-<!-- Modal To Add Projection -->
 <div class="modal fade" id="createProjectionModal" tabindex="-1">
     <form id="createProjectionForm" method="post" asp-controller="ContentAdmin" asp-action="CreateProjection">
         <div class="modal-dialog">
@@ -274,6 +216,7 @@ else if ((bool)ViewData["MovieUpdateSuccess"]! ||
                                 @{
                                     // Calculate default value: 1 day in the future from now
                                     DateTime defaultStartingTime = DateTime.Now.AddDays(1);
+                                    // Calculate default value: 1 day in the future from now + 2 hours
                                     DateTime defaultEndingTime = DateTime.Now.AddDays(1).AddHours(2);
                                 }
                                 <label asp-for="Projection.StartingTime" class="form-label">Starting Time:</label>
@@ -317,18 +260,6 @@ else if ((bool)ViewData["MovieUpdateSuccess"]! ||
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-        //Set initial values for starting time(1 hour from now) and ending time(3 hour from now)
-        //const startingTimeInput = document.getElementById("startingTime");
-        //const startingTime = new Date();
-        //startingTime.setHours(startingTime.getHours() + 4);
-        //startingTimeInput.value = startingTime.toISOString().slice(0, 16);
-        //const endingTimeInput = document.getElementById("endingTime");
-        //const endingTime = new Date();
-        //endingTime.setHours(endingTime.getHours() + 6);
-        //endingTimeInput.value = endingTime.toISOString().slice(0, 16);
-
-       
-
         //edit button functionality
         function toggleInputField(inputId, buttonId) {
             let inputField = document.getElementById(inputId);
@@ -344,6 +275,5 @@ else if ((bool)ViewData["MovieUpdateSuccess"]! ||
                 }
             }
         }
-
     </script>
 }

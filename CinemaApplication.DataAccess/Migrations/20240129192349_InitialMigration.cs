@@ -19,11 +19,11 @@ namespace CinemaApplication.DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CardNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CardNumber = table.Column<string>(type: "nvarchar(19)", maxLength: 19, nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CardHolderName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CVC = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    CardHolderName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    CVC = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -36,7 +36,7 @@ namespace CinemaApplication.DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AvailableSeats = table.Column<int>(type: "int", nullable: false),
                     Supports3D = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -51,10 +51,10 @@ namespace CinemaApplication.DataAccess.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Director = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Category = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
+                    Director = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ReleaseDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
                     IsAgeRestricted = table.Column<bool>(type: "bit", nullable: false),
@@ -72,9 +72,10 @@ namespace CinemaApplication.DataAccess.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     SeatsLeft = table.Column<int>(type: "int", nullable: false),
-                    MovieId = table.Column<int>(type: "int", nullable: false),
-                    AirDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CinemaRoomId = table.Column<int>(type: "int", nullable: false)
+                    StartingTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndingTime = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CinemaRoomId = table.Column<int>(type: "int", nullable: false),
+                    MovieId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

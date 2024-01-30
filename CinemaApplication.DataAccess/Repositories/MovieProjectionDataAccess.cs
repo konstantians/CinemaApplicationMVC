@@ -83,23 +83,25 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
         }
     }
 
-    public async Task UpdateMovieProjectionAsync(int id, MovieProjection projection)
+    public async Task<bool> UpdateMovieProjectionAsync(int id, MovieProjection projection)
     {
         try
         {
             MovieProjection foundProjection = await GetMovieProjectionAsync(id);
             if (foundProjection is null)
-                return;
+                return false;
 
             foundProjection.SeatsLeft = projection.SeatsLeft;
             foundProjection.StartingTime = projection.StartingTime;
             foundProjection.EndingTime = projection.EndingTime;
             await _context.SaveChangesAsync();
+
+            return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
-            throw;
+            return false;
         }
     }
 
@@ -110,7 +112,7 @@ public class MovieProjectionDataAccess : IMovieProjectionDataAccess
             MovieProjection foundMovieProjection = await GetMovieProjectionAsync(id);
             foreach (Ticket reservation in foundMovieProjection.Tickets)
             {
-                await _reservationDataAccess.DeleteReservationAsync(reservation.Id);
+                await _reservationDataAccess.DeleteTicketsAsync(reservation.Id);
             }
             _context.MovieProjections.Remove(foundMovieProjection);
             await _context.SaveChangesAsync();

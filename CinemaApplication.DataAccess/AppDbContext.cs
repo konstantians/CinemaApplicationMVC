@@ -44,11 +44,6 @@ public class AppDbContext : DbContext
             .WithMany(projection => projection.Projections)
             .HasForeignKey(projection => projection.CinemaRoomId);
 
-        modelBuilder.Entity<Ticket>()
-            .HasOne(reservation => reservation.MovieProjection)
-            .WithMany(reservation => reservation.Tickets)
-            .HasForeignKey(projection => projection.MovieProjectionId);
-        
         modelBuilder.Entity<Movie>().HasData(
         new Movie() { 
             Id = 1,

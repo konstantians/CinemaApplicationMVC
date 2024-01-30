@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using CinemaApplication.SharedModels;
+using System.ComponentModel.DataAnnotations;
 
 namespace CinemaApplication.MVC.Models.EditAccountModels;
 
@@ -14,4 +15,8 @@ public class AccountBasicSettingsViewModel
     [Phone]
     [Display(Name = "Phone Number")]
     public string? PhoneNumber { get; set; }
+
+    public List<BankCard> BankCards { get; set; } = new List<BankCard>();
+    public List<Ticket> Tickets { get; set; } = new List<Ticket>();
+
 }
