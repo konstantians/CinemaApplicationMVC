@@ -5,7 +5,7 @@
 }
 
 @if ((bool)ViewData["DuplicateUsernameError"]! || (bool)ViewData["DuplicateEmailError"]! ||
-   (bool)ViewData["BasicInformationChangeError"]! || (bool)ViewData["PasswordChangeError"]! ||
+  (bool)ViewData["BasicInformationChangeError"]! || (bool)ViewData["PasswordChangeError"]! || (bool)ViewData["PasswordMismatchError"]! ||
    (bool)ViewData["BankCardCreationFailure"]! || (bool)ViewData["BankCardUpdateFailure"]! ||
   (bool)ViewData["BankCardDeletionFailure"]! || (bool)ViewData["TicketDeletionFailure"]!)
 {
@@ -33,6 +33,12 @@
                 else if ((bool)ViewData["PasswordChangeError"]!){
                     <div>
                         Something went wrong while updating your account password.
+                        Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
+                    </div>
+                }
+                else if((bool)ViewData["PasswordMismatchError"]!){
+                    <div>
+                        The current password you provided is not the password of the account.
                         Please try again or contact us through our email kinnaskonstantinos0@gmail.com.
                     </div>
                 }
@@ -287,9 +293,9 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
                         @* TODO maybe add a warning here *@
                         <div class="row">
                             <div class="col-12 mb-3">
-                                <label asp-for="ChangePasswordModel.OldPassword" class="form-label">Old Password</label>
-                                <input asp-for="ChangePasswordModel.OldPassword" value="" class="form-control" type="password">
-                                <span asp-validation-for="ChangePasswordModel.OldPassword" class="text-danger"></span>
+                                <label asp-for="ChangePasswordModel.OldPasswordGivenByUser" class="form-label">Old Password</label>
+                                <input asp-for="ChangePasswordModel.OldPasswordGivenByUser" class="form-control" type="password">
+                                <span asp-validation-for="ChangePasswordModel.OldPasswordGivenByUser" class="text-danger"></span>
                             </div>
                             <div class=" col-12 mb-3">
                                 <label asp-for="ChangePasswordModel.NewPassword" class="form-label">New Password</label>
@@ -324,7 +330,17 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
                 </div>
                 <div class="modal-body" style="text-align: left;">
                     <div class="container">
-                        @* TODO maybe add a warning here *@
+                        <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                            <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                            </symbol>
+                        </svg>
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Warning:"><use xlink:href="#exclamation-triangle-fill" /></svg>
+                            <div>
+                                This action will log you out of your account and it will deactivate it until you confirm your new email.<br />
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-12 mb-3">
                                 <label asp-for="ChangeEmailModel.OldEmail" class="form-label">Old Email</label>
@@ -333,6 +349,7 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
                             <div class=" col-12 mb-3">
                                 <label asp-for="ChangeEmailModel.NewEmail" class="form-label">New Email</label>
                                 <input asp-for="ChangeEmailModel.NewEmail" type="text" class="form-control">
+                                <span asp-validation-for="ChangeEmailModel.NewEmail" class="text-danger" />
                             </div>
                         </div>
                     </div>
@@ -452,19 +469,15 @@ else if ((bool)ViewData["BasicInformationChangeSuccess"]! || (bool)ViewData["Pas
     <script>
         //edit button functionality
         function toggleInputField(inputId, buttonId) {
-            alert(inputId);
-            alert(buttonId);
             let inputField = document.getElementById(inputId);
             let button = document.getElementById(buttonId);
 
             if (inputField && button) {
                 if (inputField.readOnly) {
-                    inputField.removeAttribute("contenteditable");
-                    //inputField.readOnly = false;
+                    inputField.readOnly = false;
                     button.innerHTML = '<i class="fa-solid fa-check"></i>';
                 } else {
-                    inputField.setAttribute("contenteditable", "true");
-                    //inputField.readOnly = true;
+                    inputField.readOnly = true;
                     button.innerHTML = '<i class="fa-solid fa-pencil"></i>';
                 }
             }

@@ -4,6 +4,15 @@
 @{
     ViewData["Title"] = "Cinema Program";
     bool isSignedIn = await _authenticationProcedures.CheckIfUserIsLoggedIn();
+    bool hasBankCards = true;
+    if(Model.BankCards is null)
+    {
+        hasBankCards = false;
+    }
+    else if(Model.BankCards.Count == 0)
+    {
+        hasBankCards = false;
+    }
     int count = 0;
 }
 
@@ -149,7 +158,7 @@ else if ((bool)ViewData["CreateTicketSuccess"]!)
                                             <td>@projection.EndingTime.Hour : @projection.EndingTime.Minute</td>
                                             <td>@projection.CinemaRoomId</td>
                                             <td>
-                                                <a class="btn btn-sm btn-outline-primary" onclick="checkConditionAndShowModal(event, '@projection.Id' , '@isSignedIn')">
+                                                <a class="btn btn-sm btn-outline-primary" onclick="checkConditionAndShowModal(event, '@projection.Id' , '@isSignedIn' , '@hasBankCards')">
                                                     Get Tickets
                                                 </a>
                                             </td>
@@ -172,11 +181,6 @@ else if ((bool)ViewData["CreateTicketSuccess"]!)
     {
         <!-- Modal To Add Tickets -->
         <div class="modal fade" id="getTicketsModal-@projection.Id" tabindex="-1" role="dialog">
-            @{
-                //string reservationsId = "reservations-" + projection.Id;
-                //string bankCardId = "bankCardNumber-" + projection.Id;
-                //string formId = "getTicketsForm-" + projection.Id;
-            }
             <form id="getTicketsForm-@projection.Id method="post" asp-action="PurchaseTicket" asp-controller="Account">
                 <div class="modal-dialog">
                     <div class="modal-content">
@@ -201,9 +205,12 @@ else if ((bool)ViewData["CreateTicketSuccess"]!)
                                         <div class="col-12">
                                             <label for="bankCardNumber-@projection.Id" class="form-label">Choose BankCard:</label>
                                             <select name="bankCardNumber" id="bankCardNumber-@projection.Id" class="form-select">
-                                                @foreach (BankCard bankCard in Model.BankCards)
+                                                @if(Model.BankCards is not null)
                                                 {
-                                                    <option value="@bankCard.Id">BankCard Number: @bankCard.CardNumber</option>
+                                                    foreach (BankCard bankCard in Model.BankCards)
+                                                    {
+                                                        <option value="@bankCard.Id">BankCard Number: @bankCard.CardNumber</option>
+                                                    }
                                                 }
                                             </select>
                                         </div>
@@ -254,13 +261,18 @@ else if ((bool)ViewData["CreateTicketSuccess"]!)
 
     <script>
 
-        function checkConditionAndShowModal(event, projectionId, showModalCondition) {
+        function checkConditionAndShowModal(event, projectionId, showModalCondition, hasBankCards) {
             // Your condition check here
             if (showModalCondition === 'False') {
                 // Condition is met, prevent modal from showing
                 event.preventDefault();
                 alert("You need to be logged in to by tickets.");
-            } else {
+            }
+            else if(hasBankCards === 'False'){
+                event.preventDefault();
+                alert("You need to at least have 1 bankCard added to your account.");
+            }
+            else {
                 // Condition is not met, proceed to show the modal
                 let modalId = "#getTicketsModal-" + projectionId;
                 $(modalId).modal('show'); // Assuming you're using Bootstrap modal

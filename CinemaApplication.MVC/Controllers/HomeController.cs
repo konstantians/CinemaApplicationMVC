@@ -34,20 +34,12 @@ namespace CinemaApplication.MVC.Controllers
             return View();
         }
 
-        //TODO maybe we need user stuff here
-        [AllowAnonymous]
-        public IActionResult PurchaseTickets()
-        {
-            return View();
-        }
-
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
             return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
         }
 
-        //TODO maybe we need user stuff here
         [AllowAnonymous]
         public async Task<IActionResult> CinemaProgram(bool createTicketFailure, bool createTicketSuccess, bool noSeatsLeft)
         {

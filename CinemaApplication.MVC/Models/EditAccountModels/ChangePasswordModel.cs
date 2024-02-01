@@ -5,11 +5,13 @@ namespace CinemaApplication.MVC.Models.EditAccountModels;
 
 public class ChangePasswordModel
 {
-    [Required]
     public string? OldPassword { get; set; }
 
+    [Required]
+    public string? OldPasswordGivenByUser { get; set; }
+
     [Required(ErrorMessage = "This field is required")]
-    [ComparePassword("Password", ErrorMessage = "The passwords do not match.")]
+    [ComparePassword("ConfirmNewPassword", ErrorMessage = "The passwords do not match.")]
     public string? NewPassword { get; set; }
 
     [Required(ErrorMessage = "This field is required")]

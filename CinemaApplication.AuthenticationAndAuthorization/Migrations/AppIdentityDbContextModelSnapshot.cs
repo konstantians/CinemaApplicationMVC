@@ -22,117 +22,6 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CinemaApplication.SharedModels.CinemaRoom", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AvailableSeats")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("Supports3D")
-                        .HasColumnType("bit");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("CinemaRoom");
-                });
-
-            modelBuilder.Entity("CinemaApplication.SharedModels.Movie", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Director")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Length")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Type")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Movie");
-                });
-
-            modelBuilder.Entity("CinemaApplication.SharedModels.MovieProjection", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("AirDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CinemaRoomId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("MovieId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SeatsLeft")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CinemaRoomId");
-
-                    b.HasIndex("MovieId");
-
-                    b.ToTable("MovieProjection");
-                });
-
-            modelBuilder.Entity("CinemaApplication.SharedModels.Reservation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("AppUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("MovieProjectionId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("NumberOfSeats")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ReservationRefoundPrice")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AppUserId");
-
-                    b.HasIndex("MovieProjectionId");
-
-                    b.ToTable("Reservation");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -162,22 +51,22 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "d128c502-33a2-4885-80f5-df5e57970769",
-                            ConcurrencyStamp = "53b0d7df-25c5-4d0f-9c2b-2f076920b6e8",
+                            Id = "df30b617-8d3d-47be-b613-814cc8bf73d5",
+                            ConcurrencyStamp = "311531ff-0919-412a-9661-73bb5d751798",
                             Name = "User",
                             NormalizedName = "USER"
                         },
                         new
                         {
-                            Id = "b8461e66-c28e-4a89-bf86-89850a03049a",
-                            ConcurrencyStamp = "9ca7e411-2dca-4511-b14a-3fc9bba103dc",
+                            Id = "f6c04015-3733-4b30-9552-bacd10fd971a",
+                            ConcurrencyStamp = "5e8c075e-c43e-4b17-9dd6-1741c1e8df35",
                             Name = "ContentAdmin",
                             NormalizedName = "CONTENTADMIN"
                         },
                         new
                         {
-                            Id = "70609c49-078d-44d0-99b4-8b7b85b7600d",
-                            ConcurrencyStamp = "e8adbfa7-45f7-4742-8e07-64f29c7154ad",
+                            Id = "2f66787c-2cb5-4e62-b8ce-b0cd8184142d",
+                            ConcurrencyStamp = "3c9d7f34-8673-40fb-81f0-cab66a16199b",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         });
@@ -369,40 +258,6 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Migrations
                     b.HasDiscriminator().HasValue("AppUser");
                 });
 
-            modelBuilder.Entity("CinemaApplication.SharedModels.MovieProjection", b =>
-                {
-                    b.HasOne("CinemaApplication.SharedModels.CinemaRoom", "CinemaRoom")
-                        .WithMany("Projections")
-                        .HasForeignKey("CinemaRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("CinemaApplication.SharedModels.Movie", "Movie")
-                        .WithMany("Projections")
-                        .HasForeignKey("MovieId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CinemaRoom");
-
-                    b.Navigation("Movie");
-                });
-
-            modelBuilder.Entity("CinemaApplication.SharedModels.Reservation", b =>
-                {
-                    b.HasOne("CinemaApplication.SharedModels.AppUser", null)
-                        .WithMany("Reservations")
-                        .HasForeignKey("AppUserId");
-
-                    b.HasOne("CinemaApplication.SharedModels.MovieProjection", "MovieProjection")
-                        .WithMany("Reservations")
-                        .HasForeignKey("MovieProjectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("MovieProjection");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -452,26 +307,6 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("CinemaApplication.SharedModels.CinemaRoom", b =>
-                {
-                    b.Navigation("Projections");
-                });
-
-            modelBuilder.Entity("CinemaApplication.SharedModels.Movie", b =>
-                {
-                    b.Navigation("Projections");
-                });
-
-            modelBuilder.Entity("CinemaApplication.SharedModels.MovieProjection", b =>
-                {
-                    b.Navigation("Reservations");
-                });
-
-            modelBuilder.Entity("CinemaApplication.SharedModels.AppUser", b =>
-                {
-                    b.Navigation("Reservations");
                 });
 #pragma warning restore 612, 618
         }

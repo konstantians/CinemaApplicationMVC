@@ -17,7 +17,7 @@ public interface IAuthenticationProcedures
     Task<bool> ConfirmEmailAsync(string userId, string confirmationToken);
     Task<string> CreateResetPasswordTokenAsync(AppUser appUser);
     Task<bool> ResetPasswordAsync(string userId, string resetPasswordToken, string newPassword);
-    Task<bool> ChangePasswordAsync(AppUser appUser, string currentPassword, string newPassword);
+    Task<(bool, string)> ChangePasswordAsync(AppUser appUser, string currentPassword, string newPassword);
     Task<string> CreateChangeEmailTokenAsync(AppUser appUser, string newEmail);
     Task<bool> ChangeEmailAsync(string userId, string changeEmailToken, string newEmail);
     Task<List<AppUser>> GetUsersAsync();

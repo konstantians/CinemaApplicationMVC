@@ -5,11 +5,9 @@ using CinemaApplication.EmailServiceLibrary;
 using CinemaApplication.MVC.Models;
 using CinemaApplication.MVC.Models.EditAccountModels;
 using CinemaApplication.SharedModels;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Net.Sockets;
 
 namespace CinemaApplication.MVC.Controllers;
 
@@ -38,8 +36,12 @@ public class AccountController : Controller
 
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult SignUp(bool duplicateUsername, bool duplicateEmail)
+    public async Task<IActionResult> SignUp(bool duplicateUsername, bool duplicateEmail)
     {
+        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        if (appUser is not null)
+            return RedirectToAction("Index", "Home");
+
         ViewData["DuplicateUsername"] = duplicateUsername;
         ViewData["DuplicateEmail"] = duplicateEmail;
         return View();
@@ -49,6 +51,10 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> SignUp(RegisterModel registerModel)
     {
+        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        if (appUser is not null)
+            return RedirectToAction("Index", "Home");
+
         if (!ModelState.IsValid)
         {
             return View();
@@ -57,16 +63,16 @@ public class AccountController : Controller
         var result = await _authenticationProcedures.FindByUsernameAsync(registerModel.Username);
         if (result != null)
         {
-            return SignUp(true, false);
+            return await SignUp(true, false);
         }
 
         result = await _authenticationProcedures.FindByEmailAsync(registerModel.Email);
         if(result != null)
         {
-            return SignUp(false, true);
+            return await SignUp(false, true);
         }
 
-        AppUser appUser = new AppUser();
+        appUser = new AppUser();
         appUser.UserName = registerModel.Username;
         appUser.PhoneNumber = registerModel.PhoneNumber;
         appUser.Email = registerModel.Email;
@@ -84,8 +90,12 @@ public class AccountController : Controller
 
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult SignIn(bool falseResetAccount, bool invalidCredentials)
+    public async Task<IActionResult> SignIn(bool falseResetAccount, bool invalidCredentials)
     {
+        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        if (appUser is not null)
+            return RedirectToAction("Index", "Home");
+
         ViewData["FalseResetAccount"] = falseResetAccount;
         ViewData["InvalidCredentials"] = invalidCredentials;
         return View();
@@ -95,7 +105,11 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> SignIn(SignInModel signInModel)
     {
-        if(!ModelState.IsValid)
+        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        if (appUser is not null)
+            return RedirectToAction("Index", "Home");
+
+        if (!ModelState.IsValid)
         {
             return View();
         }
@@ -114,8 +128,8 @@ public class AccountController : Controller
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> EditAccount(bool duplicateUsernameError, bool duplicateEmailError,
-        bool basicInformationChangeError, bool passwordInformationChangeError,
-        bool basicInformationChangeSuccess, bool passwordChangeSuccess,
+        bool basicInformationChangeError, bool basicInformationChangeSuccess, 
+        bool passwordChangeSuccess, bool passwordChangeError, bool passwordMismatchError,
         bool bankCardCreationSuccess, bool bankCardCreationFailure,
         bool bankCardUpdateSuccess, bool bankCardUpdateFailure,
         bool bankCardDeletionSuccess, bool bankCardDeletionFailure,
@@ -149,9 +163,11 @@ public class AccountController : Controller
         ViewData["DuplicateUsernameError"] = duplicateUsernameError;
         ViewData["DuplicateEmailError"] = duplicateEmailError;
         ViewData["BasicInformationChangeError"] = basicInformationChangeError;
-        ViewData["PasswordChangeError"] = passwordInformationChangeError;
         ViewData["BasicInformationChangeSuccess"] = basicInformationChangeSuccess;
+        
         ViewData["PasswordChangeSuccess"] = passwordChangeSuccess;
+        ViewData["PasswordChangeError"] = passwordChangeError;
+        ViewData["PasswordMismatchError"] = passwordMismatchError;
 
         ViewData["BankCardCreationSuccess"] = bankCardCreationSuccess;
         ViewData["BankCardCreationFailure"] = bankCardCreationFailure;
@@ -192,11 +208,19 @@ public class AccountController : Controller
     [Authorize]
     public async Task<IActionResult> ChangePassword(ChangePasswordModel changePasswordModel)
     {
+        if (!ModelState.IsValid)
+        {
+            return RedirectToAction("EditAccount", "Account", new { passwordChangeError = true});
+        }
+
         AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
 
-        bool result = await _authenticationProcedures.ChangePasswordAsync(appUser, changePasswordModel.OldPassword, changePasswordModel.NewPassword);
-        if (!result)
-            return RedirectToAction("EditAccount", "Account", new { passwordChangeError = true});
+        (bool result, string errorCode) = await _authenticationProcedures.ChangePasswordAsync(appUser, changePasswordModel.OldPasswordGivenByUser, changePasswordModel.NewPassword);
+        
+        if (!result && errorCode == "passwordMismatch")
+            return RedirectToAction("EditAccount", "Account", new { passwordMismatchError = true});
+        else if(!result)
+            return RedirectToAction("EditAccount", "Account", new { passwordChangeError = true });
 
         return RedirectToAction("EditAccount", "Account", new { passwordChangeSuccess = true});
     }
@@ -205,7 +229,11 @@ public class AccountController : Controller
     [Authorize]
     public async Task<IActionResult> RequestChangeAccountEmail(ChangeEmailModel changeEmailModel)
     {
-        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        AppUser appUser = await _authenticationProcedures.FindByEmailAsync(changeEmailModel.NewEmail);
+        if(appUser is not null)
+            return RedirectToAction("EditAccount", "Account", new { duplicateEmailError = true });
+
+        appUser = await _authenticationProcedures.GetCurrentUserAsync();
         string resetToken = await _authenticationProcedures.CreateChangeEmailTokenAsync(appUser, changeEmailModel.NewEmail);
 
         //maybe do a check here
@@ -271,10 +299,14 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> ResetPassword(string userId, string token)
     {
-        AppUser appUser = await _authenticationProcedures.FindByUserIdAsync(userId);
+        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        if (appUser is not null)
+            return RedirectToAction("Index", "Home");
+
+        appUser = await _authenticationProcedures.FindByUserIdAsync(userId);
         if(appUser is null)
         {
-            //Add error here
+            //TODO Add error here
             return RedirectToAction("Index", "Home");
         }
 
@@ -288,6 +320,10 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> ResetPassword(ResetPasswordModel resetPasswordModel)
     {
+        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        if (appUser is not null)
+            return RedirectToAction("Index", "Home");
+
         if (!ModelState.IsValid)
         {
             return View();
@@ -308,7 +344,10 @@ public class AccountController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> ForgotPassword(string username, string email)
     {
-        AppUser appUser;
+        AppUser appUser = await _authenticationProcedures.GetCurrentUserAsync();
+        if (appUser is not null)
+            return RedirectToAction("Index", "Home");
+
         if(username is null)
         {
             appUser = await _authenticationProcedures.FindByEmailAsync(email);

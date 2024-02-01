@@ -54,38 +54,6 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CinemaRoom",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AvailableSeats = table.Column<int>(type: "int", nullable: false),
-                    Supports3D = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CinemaRoom", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Movie",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Length = table.Column<int>(type: "int", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Summary = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Director = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Movie", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -191,70 +159,14 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "MovieProjection",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SeatsLeft = table.Column<int>(type: "int", nullable: false),
-                    MovieId = table.Column<int>(type: "int", nullable: false),
-                    AirDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CinemaRoomId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MovieProjection", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MovieProjection_CinemaRoom_CinemaRoomId",
-                        column: x => x.CinemaRoomId,
-                        principalTable: "CinemaRoom",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MovieProjection_Movie_MovieId",
-                        column: x => x.MovieId,
-                        principalTable: "Movie",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Reservation",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NumberOfSeats = table.Column<int>(type: "int", nullable: false),
-                    ReservationRefoundPrice = table.Column<int>(type: "int", nullable: false),
-                    MovieProjectionId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AppUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Reservation", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Reservation_AspNetUsers_AppUserId",
-                        column: x => x.AppUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Reservation_MovieProjection_MovieProjectionId",
-                        column: x => x.MovieProjectionId,
-                        principalTable: "MovieProjection",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.InsertData(
                 table: "AspNetRoles",
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "70609c49-078d-44d0-99b4-8b7b85b7600d", "e8adbfa7-45f7-4742-8e07-64f29c7154ad", "Admin", "ADMIN" },
-                    { "b8461e66-c28e-4a89-bf86-89850a03049a", "9ca7e411-2dca-4511-b14a-3fc9bba103dc", "ContentAdmin", "CONTENTADMIN" },
-                    { "d128c502-33a2-4885-80f5-df5e57970769", "53b0d7df-25c5-4d0f-9c2b-2f076920b6e8", "User", "USER" }
+                    { "2f66787c-2cb5-4e62-b8ce-b0cd8184142d", "3c9d7f34-8673-40fb-81f0-cab66a16199b", "Admin", "ADMIN" },
+                    { "df30b617-8d3d-47be-b613-814cc8bf73d5", "311531ff-0919-412a-9661-73bb5d751798", "User", "USER" },
+                    { "f6c04015-3733-4b30-9552-bacd10fd971a", "5e8c075e-c43e-4b17-9dd6-1741c1e8df35", "ContentAdmin", "CONTENTADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -295,26 +207,6 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MovieProjection_CinemaRoomId",
-                table: "MovieProjection",
-                column: "CinemaRoomId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MovieProjection_MovieId",
-                table: "MovieProjection",
-                column: "MovieId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Reservation_AppUserId",
-                table: "Reservation",
-                column: "AppUserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Reservation_MovieProjectionId",
-                table: "Reservation",
-                column: "MovieProjectionId");
         }
 
         /// <inheritdoc />
@@ -336,22 +228,10 @@ namespace CinemaApplication.AuthenticationAndAuthorization.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Reservation");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
-
-            migrationBuilder.DropTable(
-                name: "MovieProjection");
-
-            migrationBuilder.DropTable(
-                name: "CinemaRoom");
-
-            migrationBuilder.DropTable(
-                name: "Movie");
         }
     }
 }

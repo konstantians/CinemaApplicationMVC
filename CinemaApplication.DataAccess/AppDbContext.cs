@@ -34,6 +34,10 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Ticket>().HasKey(reservation => reservation.Id);
         modelBuilder.Entity<BankCard>().HasKey(bankCard => bankCard.Id);
 
+        modelBuilder.Entity<BankCard>().HasIndex(bankCard => bankCard.CardNumber).IsUnique();
+        modelBuilder.Entity<Movie>().HasIndex(movie => movie.Title).IsUnique();
+        modelBuilder.Entity<CinemaRoom>().HasIndex(cinemaRoom => cinemaRoom.Name).IsUnique();
+
         modelBuilder.Entity<MovieProjection>()
             .HasOne(projection => projection.Movie)
             .WithMany(projection => projection.Projections)

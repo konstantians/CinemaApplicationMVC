@@ -213,17 +213,21 @@ public class AuthenticationProcedures : IAuthenticationProcedures
         }
     }
 
-    public async Task<bool> ChangePasswordAsync(AppUser appUser, string currentPassword, string newPassword)
+    public async Task<(bool, string)> ChangePasswordAsync(AppUser appUser, string currentPassword, string newPassword)
     {
         try
         {
             var result = await _userManager.ChangePasswordAsync(appUser, currentPassword, newPassword);
-            return result.Succeeded;
+            if (!result.Succeeded && result.Errors.Where(error => error.Code == "PasswordMismatch").Count() > 0)
+                return (false, "passwordMismatch");
+            else if (!result.Succeeded)
+                return (false, "unknown");
+            return (true,"nothing");
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex);
-            throw;
+            return (false, "unknown");
         }
     }
 
