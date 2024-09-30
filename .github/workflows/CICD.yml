@@ -33,7 +33,7 @@ jobs:
         run: dotnet ef database update --project CinemaApplication.DataAccess/CinemaApplication.DataAccess.csproj --startup-project CinemaApplication.MVC/CinemaApplication.MVC.csproj --context AppDbContext --connection ${{ secrets.DefaultData }}
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}\\myapp
+        run: dotnet publish -c Release -o "${{ env.DOTNET_ROOT }}\\myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
