@@ -1,0 +1,64 @@
+name: CICD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Install EF Core Tools
+        run: dotnet tool install --global dotnet-ef
+
+      - name: Install EF Core Design package
+        run: dotnet add CinemaApplication.MVC/CinemaApplication.MVC.csproj package Microsoft.EntityFrameworkCore.Design --version 7.0.17
+
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
+
+      - name: Authentication Migrations
+        run: dotnet ef database update --project CinemaApplication.AuthenticationAndAuthorization/CinemaApplication.AuthenticationAndAuthorization.csproj --startup-project CinemaApplication.MVC/CinemaApplication.MVC.csproj --context AppIdentityDbContext --connection ${{ secrets.DefaultAuthentication }}
+      - name: Authentication Migrations
+        run: dotnet ef database update --project CinemaApplication.DataAccess/CinemaApplication.DataAccess.csproj --startup-project CinemaApplication.MVC/CinemaApplication.MVC.csproj --context AppIdentityDbContext --connection ${{ secrets.DefaultData }}
+
+      - name: dotnet publish
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
+
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: windows-latest
+    needs: build
+    environment:
+      name: 'production'
+      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+    
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+      
+      - name: Deploy to Azure Web App
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'CinemaAppMVC'
+          slot-name: 'production'
+          package: .
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_45CB7B8507ED4D00AD504A4CBAB6FA0E }}
