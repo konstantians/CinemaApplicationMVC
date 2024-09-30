@@ -29,8 +29,8 @@ jobs:
 
       - name: Authentication Migrations
         run: dotnet ef database update --project CinemaApplication.AuthenticationAndAuthorization/CinemaApplication.AuthenticationAndAuthorization.csproj --startup-project CinemaApplication.MVC/CinemaApplication.MVC.csproj --context AppIdentityDbContext --connection ${{ secrets.DefaultAuthentication }}
-      - name: Authentication Migrations
-        run: dotnet ef database update --project CinemaApplication.DataAccess/CinemaApplication.DataAccess.csproj --startup-project CinemaApplication.MVC/CinemaApplication.MVC.csproj --context AppIdentityDbContext --connection ${{ secrets.DefaultData }}
+      - name: Data Migrations
+        run: dotnet ef database update --project CinemaApplication.DataAccess/CinemaApplication.DataAccess.csproj --startup-project CinemaApplication.MVC/CinemaApplication.MVC.csproj --context AppDbContext --connection ${{ secrets.DefaultData }}
 
       - name: dotnet publish
         run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
