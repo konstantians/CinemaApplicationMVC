@@ -149,9 +149,9 @@ else if ((bool)ViewData["MovieUpdateSuccess"]! ||
                     <ul class="list-group" id="projectionList">
                         @foreach (MovieProjection projection in Model.Movie.Projections)
                         {
-                            string formattedDate = @$"{projection.StartingTime.Year}/{projection.StartingTime.Month}/{projection.StartingTime.Day} " +
-                            @$"{projection.StartingTime.Hour} : {projection.StartingTime.Minute} Until " +
-                            @$"{projection.EndingTime.Hour} : {projection.EndingTime.Minute}";
+                            string formattedDate = $"{projection.StartingTime.Year}/{projection.StartingTime.Month}/{projection.StartingTime.Day} " +
+                            $"{projection.StartingTime.Hour} : {projection.StartingTime.Minute} Until " +
+                            $"{projection.EndingTime.Hour} : {projection.EndingTime.Minute}";
                             <li class="list-group-item">
                                 <div class="d-flex align-items-center justify-content-between">
                                     ID: @projection.Id Movie: @projection.Movie!.Title<br>
